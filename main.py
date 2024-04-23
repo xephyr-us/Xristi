@@ -1,11 +1,14 @@
 from src import RootWindow
+import src.events as events
 
 
-CONFIG = "CONFIG"
+CONFIG = "./CONFIG"
 
 
 def main():
-    app = RootWindow()
+    events.EventStream()  # Instantiating EventStream singleton
+    app = RootWindow(CONFIG)
+
     running = True
     while running:
         running = app.launch()

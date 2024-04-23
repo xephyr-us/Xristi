@@ -1,1 +1,1 @@
-from gui import RootWindow
+from .gui import RootWindow

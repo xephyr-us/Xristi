@@ -1,1 +1,1 @@
-from windows import RootWindow
+from .windows import RootWindow

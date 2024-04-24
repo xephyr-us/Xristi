@@ -12,7 +12,7 @@ class ToolPanel(Panel):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self._frame.configure(bg="red")
+        self._frame.configure()
 
 
 class BlankPanel(Panel):

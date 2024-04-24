@@ -20,6 +20,9 @@ class RootWindow:
     _PRIMARY_PANEL_WIDTH = 11   # Relative to _GRID_WIDTH
     _PRIMARY_PANEL_HEIGHT = 24  # Relative to _GRID_HEIGHT
 
+    _PANEL_PAD_X = 3  # Pixels
+    _PANEL_PAD_Y = 3  # Pixels
+
     def __init__(self, config):
         self._config_path = config
         self._config = ioutils.read_key_value_file(config)
@@ -42,35 +45,44 @@ class RootWindow:
         self._EVENT_STREAM.subscribe(events.UPDATE_TERTIARY_PANEL, self._set_tertiary_panel)
 
     def _set_primary_panel(self, panel_cls):
-        panel = guiutils.init_grid_widget(
+        panel = guiutils.init_labelled_grid_widget(
             panel_cls,
             self._root,
+            label=panel_cls.title(),
             x=0,
             y=0,
             w=self._PRIMARY_PANEL_WIDTH,
-            h=self._PRIMARY_PANEL_HEIGHT
+            h=self._PRIMARY_PANEL_HEIGHT,
+            padx=self._PANEL_PAD_X,
+            pady=self._PANEL_PAD_Y
         )
         self._primary_panel = panel
 
     def _set_secondary_panel(self, panel_cls):
-        panel = guiutils.init_grid_widget(
+        panel = guiutils.init_labelled_grid_widget(
             panel_cls,
             self._root,
+            label=panel_cls.title(),
             x=0,
             y=self._PRIMARY_PANEL_HEIGHT,
             w=self._PRIMARY_PANEL_WIDTH,
-            h=self._GRID_HEIGHT - self._PRIMARY_PANEL_HEIGHT
+            h=self._GRID_HEIGHT - self._PRIMARY_PANEL_HEIGHT,
+            padx=self._PANEL_PAD_X,
+            pady=self._PANEL_PAD_Y
         )
         self._secondary_panel = panel
 
     def _set_tertiary_panel(self, panel_cls):
-        panel = guiutils.init_grid_widget(
+        panel = guiutils.init_labelled_grid_widget(
             panel_cls,
             self._root,
+            label=panel_cls.title(),
             x=self._PRIMARY_PANEL_WIDTH,
             y=0,
             w=self._GRID_WIDTH - self._PRIMARY_PANEL_WIDTH,
-            h=self._GRID_HEIGHT
+            h=self._GRID_HEIGHT,
+            padx=self._PANEL_PAD_X,
+            pady=self._PANEL_PAD_Y
         )
         self._tertiary_panel = panel
 

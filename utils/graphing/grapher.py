@@ -1,8 +1,7 @@
 
 import matplotlib.pyplot as plt
 
-from utils import timekeeper as timeutil
-from utils import customio as ioutil
+from utils import timeutils, ioutils
 
 from .entry import SleepEntry
 
@@ -25,14 +24,14 @@ class Grapher:
 
     def _read_csv(self):
         ranges = []
-        for start, end in ioutil.read_csv(self._csv):
+        for start, end in ioutils.read_csv(self._csv):
             ranges.append((start, end))
         return ranges
 
     def _build_entries(self, ranges):
         entries = []
         for start, end in ranges:
-            if timeutil.are_matching_dates(start, end):
+            if timeutils.are_matching_dates(start, end):
                 entries.append(self._build_same_day_entry(start, end))
             else:
                 entries.append(self._build_first_entry(start))
@@ -66,38 +65,38 @@ class Grapher:
         plt.show()
 
     def _build_same_day_entry(self, start, end):
-        first_minute = timeutil.minute_of_day(start)
-        last_minute = timeutil.minute_of_day(end)
+        first_minute = timeutils.minute_of_day(start)
+        last_minute = timeutils.minute_of_day(end)
         return SleepEntry(
-            timeutil.date_as_readable_str(start, include_year=False),
+            timeutils.date_as_readable_str(start, include_year=False),
             first_minute,
             last_minute - first_minute
         )
 
     def _build_first_entry(self, start):
         return SleepEntry(
-            timeutil.date_as_readable_str(timeutil.timestamp_to_datetime(start), include_year=False),
-            timeutil.minute_of_day(start),
-            timeutil.mins_to_midnight(start)
+            timeutils.date_as_readable_str(timeutils.timestamp_to_datetime(start), include_year=False),
+            timeutils.minute_of_day(start),
+            timeutils.mins_to_midnight(start)
         )
 
     def _build_middle_entries(self, start, end):
         output = []
-        end_date = timeutil.date_as_str(end)
-        current = start + timeutil.DAY
-        while timeutil.date_as_str(current) != end_date:
+        end_date = timeutils.date_as_str(end)
+        current = start + timeutils.DAY
+        while timeutils.date_as_str(current) != end_date:
             entry = SleepEntry(
-                timeutil.date_as_readable_str(current, include_year=False),
+                timeutils.date_as_readable_str(current, include_year=False),
                 0,
-                timeutil.DAY / timeutil.MINUTE
+                timeutils.DAY / timeutils.MINUTE
             )
             output.append(entry)
-            current += timeutil.DAY
+            current += timeutils.DAY
         return output
 
     def _build_last_entry(self, end):
         return SleepEntry(
-            timeutil.date_as_readable_str(timeutil.timestamp_to_datetime(end), include_year=False),
+            timeutils.date_as_readable_str(timeutils.timestamp_to_datetime(end), include_year=False),
             0,
-            timeutil.mins_from_midnight(end)
+            timeutils.mins_from_midnight(end)
         )

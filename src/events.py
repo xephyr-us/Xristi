@@ -1,4 +1,9 @@
 
+UPDATE_PRIMARY_PANEL = 1
+UPDATE_SECONDARY_PANEL = 2
+UPDATE_TERTIARY_PANEL = 3
+
+
 class EventStream:
 
     _instance = None

@@ -1,9 +1,9 @@
-import src.gui.panels as template
+from src.gui.mixins import Panel
 
 
-class SleepMajorPanel(template.MajorPanel):
+class SleepMajorPanel(Panel):
     pass
 
 
-class SleepMinorPanel(template.MinorPanel):
+class SleepMinorPanel(Panel):
     pass

@@ -11,12 +11,12 @@ class Panel(abc.ABC):
 
     def __getattr__(self, item):
         try:
-            attr = getattr(self._frame, item)
-            return attr
+            return getattr(self._frame, item)
         except AttributeError:
             msg = self._ATTR_ERR_MSG.format(str(item), self.__class__.__name__)
             raise AttributeError(msg)
 
-
-class GridWidget(abc.ABC):
-    pass
+    @classmethod
+    @abc.abstractmethod
+    def title(cls):
+        pass

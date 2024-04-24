@@ -23,6 +23,8 @@ class RootWindow:
     _PANEL_PAD_X = 3  # Pixels
     _PANEL_PAD_Y = 3  # Pixels
 
+    _PANEL_SUBCLS_ERR_MSG = "Class {} is not a subclass of {}"
+
     def __init__(self, config):
         self._config_path = config
         self._config = ioutils.read_key_value_file(config)
@@ -45,7 +47,8 @@ class RootWindow:
         self._EVENT_STREAM.subscribe(events.UPDATE_TERTIARY_PANEL, self._set_tertiary_panel)
 
     def _set_primary_panel(self, panel_cls):
-        panel = guiutils.init_labelled_grid_widget(
+        self._verify_panel_class(panel_cls)
+        panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
             label=panel_cls.title(),
@@ -59,7 +62,8 @@ class RootWindow:
         self._primary_panel = panel
 
     def _set_secondary_panel(self, panel_cls):
-        panel = guiutils.init_labelled_grid_widget(
+        self._verify_panel_class(panel_cls)
+        panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
             label=panel_cls.title(),
@@ -73,7 +77,8 @@ class RootWindow:
         self._secondary_panel = panel
 
     def _set_tertiary_panel(self, panel_cls):
-        panel = guiutils.init_labelled_grid_widget(
+        self._verify_panel_class(panel_cls)
+        panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
             label=panel_cls.title(),
@@ -85,6 +90,14 @@ class RootWindow:
             pady=self._PANEL_PAD_Y
         )
         self._tertiary_panel = panel
+
+    def _verify_panel_class(self, panel_cls):
+        if not issubclass(panel_cls, mixins.Panel):
+            msg = self._PANEL_SUBCLS_ERR_MSG.format(
+                panel_cls.__name__,
+                mixins.Panel.__name__
+            )
+            raise TypeError(msg)
 
     def launch(self):
         self._EVENT_STREAM.publish(events.UPDATE_PRIMARY_PANEL, panels.ToolPanel)

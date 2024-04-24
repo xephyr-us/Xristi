@@ -17,9 +17,10 @@ class EventStream:
         self.__mappings = {}
 
     def publish(self, event, *args, **kwargs):
-        subscribers = self.__mappings[event]
-        for func in subscribers:
-            func(*args, **kwargs)
+        if event in self.__mappings.keys():
+            subscribers = self.__mappings[event]
+            for func in subscribers:
+                func(*args, **kwargs)
 
     def subscribe(self, event, func):
         self.__mappings.setdefault(event, [])

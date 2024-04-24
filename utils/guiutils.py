@@ -2,7 +2,7 @@ import tkinter as tk
 
 
 GRID_CONF_ERR_MSG = "Cannot configure object of class {} as a grid widget"
-INIT_GRID_WIDGET_ERR = "Cannot instantiate grid widget; check 'widget_cls' argument?"
+INIT_GRID_WIDGET_ERR_MSG = "Cannot instantiate grid widget; check 'widget_cls' argument?"
 
 
 def configure_grid(widget, width, height):
@@ -32,10 +32,10 @@ def init_grid_widget(widget_cls, parent, x, y, w, h, padx=0, pady=0):
         return widget
 
     except TypeError:
-        raise TypeError(INIT_GRID_WIDGET_ERR)
+        raise TypeError(INIT_GRID_WIDGET_ERR_MSG)
 
 
-def init_labelled_grid_widget(widget_cls, parent, label, x, y, w, h, padx=0, pady=0):
+def init_labeled_grid_widget(widget_cls, parent, label, x, y, w, h, padx=0, pady=0):
     frame = init_grid_widget(
         tk.LabelFrame,
         parent,

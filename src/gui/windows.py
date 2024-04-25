@@ -25,6 +25,8 @@ class RootWindow:
 
     _PANEL_SUBCLS_ERR_MSG = "Class {} is not a subclass of {}"
 
+    _BLANK_PANEL_MSG = "Select a tool to begin"
+
     def __init__(self, config):
         self._config_path = config
         self._config = ioutils.read_key_value_file(config)
@@ -112,6 +114,6 @@ class RootWindow:
             self._config[self._TOOLS_KEY]
         )
         self._EVENT_STREAM.publish(events.UPDATE_SECONDARY_PANEL, panels.BlankPanel)
-        self._EVENT_STREAM.publish(events.UPDATE_TERTIARY_PANEL, panels.BlankPanel)
+        self._EVENT_STREAM.publish(events.UPDATE_TERTIARY_PANEL, panels.BlankPanel, self._BLANK_PANEL_MSG)
         self._root.mainloop()
         return False

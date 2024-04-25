@@ -20,3 +20,18 @@ class Panel(abc.ABC):
         except AttributeError:
             msg = self._ATTR_ERR_MSG.format(str(item), self.__class__.__name__)
             raise AttributeError(msg)
+
+
+class WrappedButton(abc.ABC):
+
+    _ATTR_ERR_MSG = "No attribute {} found in class {}"
+
+    def __init__(self, parent):
+        self._button = tk.Button(parent)
+
+    def __getattr__(self, item):
+        try:
+            return getattr(self._button, item)
+        except AttributeError:
+            msg = self._ATTR_ERR_MSG.format(str(item), self.__class__.__name__)
+            raise AttributeError(msg)

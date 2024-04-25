@@ -2,25 +2,41 @@
 import tkinter as tk
 import os
 
+from utils import ioutils, pyutils
 from .mixins import Panel
+from .. import events
+
+
+class BlankPanel(Panel):
+
+    _LABEL_COLOR = "#858383"
+
+    _ZERO_WIDTH_SPACE = "​"
+
+    @classmethod
+    def title(cls):
+        # A zero-width space is returned such that the label frame pads the top of the frame as if it
+        # contained text, matching the padding of the adjacent panel.
+        return cls._ZERO_WIDTH_SPACE
+
+    def __init__(self, parent, label=None):
+        super().__init__(parent)
+        self._init_label(label)
+
+    def _init_label(self, content):
+        if content is None:
+            return
+        text = str(content)
+        if text:
+            label = tk.Label(self._frame, text=text, fg=self._LABEL_COLOR)
+            label.place(anchor=tk.CENTER, relx=0.5, rely=0.5)
 
 
 class ToolPanel(Panel):
 
+    _EVENT_STREAM = events.EventStream()
+
     _MODULE_DEF_FILENAME = "MANIFEST"
-
-    @staticmethod
-    def _absolute_subdirectories(path):
-        assert os.path.isdir(path)
-        for file in os.listdir(path):
-            subpath = os.path.join(path, file)
-            if os.path.isdir(subpath):
-                yield os.path.abspath(subpath)
-
-    @staticmethod
-    def _is_in_directory(filename, path):
-        assert os.path.isdir(path)
-        return filename in os.listdir(path)
 
     @classmethod
     def title(cls):
@@ -32,18 +48,24 @@ class ToolPanel(Panel):
 
     def _init_buttons(self, modules):
         buttons = []
-        for subdir in self._absolute_subdirectories(modules):
-            if self._is_in_directory(self._MODULE_DEF_FILENAME, subdir):
-                definition = os.path.join(subdir, self._MODULE_DEF_FILENAME)
+        for subdir in ioutils.absolute_subdirectories(modules):
+            if ioutils.is_in_directory(self._MODULE_DEF_FILENAME, subdir):
+                module = os.path.join(subdir, self._MODULE_DEF_FILENAME)
+                button = self._build_button(module)
+                button.pack(fill=tk.X)
+                buttons.append(button)
         return buttons
 
-
-class BlankPanel(Panel):
-
-    @classmethod
-    def title(cls):
-        return "Blank"
-
-    def __init__(self, parent):
-        super().__init__(parent)
-
+    def _build_button(self, module):
+        definition = ioutils.read_key_value_file(module, extend_filepaths=True)
+        command = pyutils.package(
+            self._EVENT_STREAM.publish,
+            events.UPDATE_TERTIARY_PANEL,
+            BlankPanel,
+            definition["name"]
+        )
+        return tk.Button(
+            self._frame,
+            text=definition["name"],
+            command=command
+        )

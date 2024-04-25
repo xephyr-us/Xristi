@@ -1,4 +1,5 @@
 
+from PIL import Image, ImageTk
 import tkinter as tk
 import os
 
@@ -37,6 +38,7 @@ class ToolPanel(Panel):
     _EVENT_STREAM = events.EventStream()
 
     _MANIFEST_FILENAME = "MANIFEST"
+    _ICON_SIZE = 35
 
     _NAME_KEY = "name"
     _ICON_KEY = "icon"
@@ -51,6 +53,7 @@ class ToolPanel(Panel):
 
     def __init__(self, parent, modules_dir):
         super().__init__(parent)
+        self._photos = []
         self._buttons = self._init_buttons(modules_dir)
 
     def _init_buttons(self, modules):
@@ -67,9 +70,13 @@ class ToolPanel(Panel):
         manifest = ioutils.read_key_value_file(manifest_path, extend_filepaths=True)
         module = ioutils.import_module_from_source(manifest[self._MODULE_KEY])
         panel_cls = getattr(module, manifest["panel"])
+        icon = self._build_icon(manifest[self._ICON_KEY])
+        self._photos.append(icon)
         return tk.Button(
             self._frame,
             text=manifest[self._NAME_KEY],
+            image=icon,
+            compound=tk.LEFT,
             command=self._build_button_command(secondary_panel_cls=panel_cls, tertiary_panel_cls=panel_cls)
         )
 
@@ -93,3 +100,9 @@ class ToolPanel(Panel):
         else:
             func = pyutils.ignore
         return func
+
+    def _build_icon(self, path):
+        image = Image.open(path)
+        image = image.resize((self._ICON_SIZE, self._ICON_SIZE))
+        icon = ImageTk.PhotoImage(image)
+        return icon

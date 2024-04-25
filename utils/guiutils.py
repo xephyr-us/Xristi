@@ -17,9 +17,9 @@ def configure_grid(widget, width, height):
         raise TypeError(msg)
 
 
-def init_grid_widget(widget_cls, parent, x, y, w, h, padx=0, pady=0):
+def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, **kwargs):
     try:
-        widget = widget_cls(parent)
+        widget = widget_cls(parent, *args, **kwargs)
         widget.grid(
             row=y,
             column=x,
@@ -35,7 +35,7 @@ def init_grid_widget(widget_cls, parent, x, y, w, h, padx=0, pady=0):
         raise TypeError(INIT_GRID_WIDGET_ERR_MSG)
 
 
-def init_labeled_grid_widget(widget_cls, parent, label, x, y, w, h, padx=0, pady=0):
+def init_labeled_grid_widget(widget_cls, parent, label, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, **kwargs):
     frame = init_grid_widget(
         tk.LabelFrame,
         parent,
@@ -47,6 +47,6 @@ def init_labeled_grid_widget(widget_cls, parent, label, x, y, w, h, padx=0, pady
         pady=pady
     )
     frame.configure(text=label)
-    widget = widget_cls(frame)
+    widget = widget_cls(frame, *args, **kwargs)
     widget.pack(fill=tk.BOTH, expand=True)
     return widget

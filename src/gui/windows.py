@@ -46,48 +46,54 @@ class RootWindow:
         self._EVENT_STREAM.subscribe(events.UPDATE_SECONDARY_PANEL, self._set_secondary_panel)
         self._EVENT_STREAM.subscribe(events.UPDATE_TERTIARY_PANEL, self._set_tertiary_panel)
 
-    def _set_primary_panel(self, panel_cls):
+    def _set_primary_panel(self, panel_cls, *args, **kwargs):
         self._verify_panel_class(panel_cls)
         panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
-            label=panel_cls.title(),
+            panel_cls.title(),
+            *args,
             x=0,
             y=0,
             w=self._PRIMARY_PANEL_WIDTH,
             h=self._PRIMARY_PANEL_HEIGHT,
             padx=self._PANEL_PAD_X,
-            pady=self._PANEL_PAD_Y
+            pady=self._PANEL_PAD_Y,
+            **kwargs
         )
         self._primary_panel = panel
 
-    def _set_secondary_panel(self, panel_cls):
+    def _set_secondary_panel(self, panel_cls, *args, **kwargs):
         self._verify_panel_class(panel_cls)
         panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
-            label=panel_cls.title(),
+            panel_cls.title(),
+            *args,
             x=0,
             y=self._PRIMARY_PANEL_HEIGHT,
             w=self._PRIMARY_PANEL_WIDTH,
             h=self._GRID_HEIGHT - self._PRIMARY_PANEL_HEIGHT,
             padx=self._PANEL_PAD_X,
-            pady=self._PANEL_PAD_Y
+            pady=self._PANEL_PAD_Y,
+            **kwargs
         )
         self._secondary_panel = panel
 
-    def _set_tertiary_panel(self, panel_cls):
+    def _set_tertiary_panel(self, panel_cls, *args, **kwargs):
         self._verify_panel_class(panel_cls)
         panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
-            label=panel_cls.title(),
+            panel_cls.title(),
+            *args,
             x=self._PRIMARY_PANEL_WIDTH,
             y=0,
             w=self._GRID_WIDTH - self._PRIMARY_PANEL_WIDTH,
             h=self._GRID_HEIGHT,
             padx=self._PANEL_PAD_X,
-            pady=self._PANEL_PAD_Y
+            pady=self._PANEL_PAD_Y,
+            **kwargs
         )
         self._tertiary_panel = panel
 
@@ -100,7 +106,11 @@ class RootWindow:
             raise TypeError(msg)
 
     def launch(self):
-        self._EVENT_STREAM.publish(events.UPDATE_PRIMARY_PANEL, panels.ToolPanel)
+        self._EVENT_STREAM.publish(
+            events.UPDATE_PRIMARY_PANEL,
+            panels.ToolPanel,
+            self._config[self._TOOLS_KEY]
+        )
         self._EVENT_STREAM.publish(events.UPDATE_SECONDARY_PANEL, panels.BlankPanel)
         self._EVENT_STREAM.publish(events.UPDATE_TERTIARY_PANEL, panels.BlankPanel)
         self._root.mainloop()

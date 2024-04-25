@@ -6,6 +6,11 @@ class Panel(abc.ABC):
 
     _ATTR_ERR_MSG = "No attribute {} found in class {}"
 
+    @classmethod
+    @abc.abstractmethod
+    def title(cls):
+        pass
+
     def __init__(self, parent):
         self._frame = tk.Frame(parent)
 
@@ -15,8 +20,3 @@ class Panel(abc.ABC):
         except AttributeError:
             msg = self._ATTR_ERR_MSG.format(str(item), self.__class__.__name__)
             raise AttributeError(msg)
-
-    @classmethod
-    @abc.abstractmethod
-    def title(cls):
-        pass

@@ -10,10 +10,9 @@ from .abstracts import Panel
 
 
 class BlankPanel(Panel):
+    _ZERO_WIDTH_SPACE = "​"
 
     _LABEL_COLOR = "#858383"
-
-    _ZERO_WIDTH_SPACE = "​"
 
     @classmethod
     def title(cls):
@@ -38,8 +37,9 @@ class ToolPanel(Panel):
 
     _EVENT_STREAM = events.EventStream()
 
+    _TITLE = "Tools"
     _MANIFEST_FILENAME = "MANIFEST"
-    _ICON_SIZE = 35
+    _ICON_SIZE = 35  # Pixels
 
     _NAME_KEY = "name"
     _ICON_KEY = "icon"
@@ -50,11 +50,11 @@ class ToolPanel(Panel):
 
     @classmethod
     def title(cls):
-        return "Tools"
+        return cls._TITLE
 
     def __init__(self, parent, modules_dir):
         super().__init__(parent)
-        self._photos = []
+        self._icons = []  # Maintains references to icons such that they are not garbage collected
         self._buttons = self._init_buttons(modules_dir)
 
     def _init_buttons(self, modules):
@@ -68,17 +68,30 @@ class ToolPanel(Panel):
         return buttons
 
     def _build_button(self, manifest_path):
-        manifest = ioutils.read_key_value_file(manifest_path, extend_filepaths=True)
+        manifest = ioutils.read_key_value_file(
+            manifest_path,
+            casefold_keys=True,
+            extend_filepaths=True
+        )
         module = ioutils.import_module_from_source(manifest[self._MODULE_KEY])
-        panel_cls = getattr(module, manifest["panel"])
+        primary_cls_name = ioutils.value_if_mapped(manifest, self._PRIMARY_KEY)
+        primary_cls = pyutils.getattr_if_present(module, primary_cls_name)
+        secondary_cls_name = ioutils.value_if_mapped(manifest, self._SECONDARY_KEY)
+        secondary_cls = pyutils.getattr_if_present(module, secondary_cls_name)
+        tertiary_cls_name = ioutils.value_if_mapped(manifest, self._TERTIARY_KEY)
+        tertiary_cls = pyutils.getattr_if_present(module, tertiary_cls_name)
         icon = self._build_icon(manifest[self._ICON_KEY])
-        self._photos.append(icon)
+        command = self._build_button_command(
+            primary_panel_cls=primary_cls,
+            secondary_panel_cls=secondary_cls,
+            tertiary_panel_cls=tertiary_cls
+        )
         return tk.Button(
             self._frame,
             text=manifest[self._NAME_KEY],
             image=icon,
             compound=tk.LEFT,
-            command=self._build_button_command(secondary_panel_cls=panel_cls, tertiary_panel_cls=panel_cls)
+            command=command
         )
 
     def _build_button_command(self, primary_panel_cls=None, secondary_panel_cls=None, tertiary_panel_cls=None):
@@ -106,4 +119,5 @@ class ToolPanel(Panel):
         image = Image.open(path)
         image = image.resize((self._ICON_SIZE, self._ICON_SIZE))
         icon = ImageTk.PhotoImage(image)
+        self._icons.append(icon)
         return icon

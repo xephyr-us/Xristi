@@ -1,0 +1,5 @@
+name=Test Module
+icon=./test.png
+content=./test.py
+second=RedPanel
+third=PurplePanel

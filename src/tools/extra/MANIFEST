@@ -1,0 +1,5 @@
+name=Extra!
+icon=./extra.png
+content=./extra.py
+second=GreenPanel
+third=GreenPanel

@@ -11,3 +11,14 @@ class RedPanel(Panel):
     def __init__(self, parent):
         super().__init__(parent)
         self._frame.configure(bg="red")
+
+
+class PurplePanel(Panel):
+
+    @classmethod
+    def title(cls):
+        return "Purple <3"
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self._frame.configure(bg="purple")

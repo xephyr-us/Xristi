@@ -12,3 +12,12 @@ def invoke(*funcs):
 
 def ignore(*args, **kwargs):
     return
+
+
+def getattr_if_present(obj, attr):
+    try:
+        if obj is None or attr is None:
+            raise AttributeError
+        return getattr(obj, attr)
+    except AttributeError:
+        return None

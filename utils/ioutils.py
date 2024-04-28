@@ -70,3 +70,7 @@ def _extend_value_if_filepath(value, context):
     if value.startswith(_WINDOWS_RELATIVE_START) or value.startswith(_UNIX_RELATIVE_START):
         return context + value[1:]
     return value
+
+
+def value_if_mapped(d, key):
+    return d[key] if key in d.keys() else None

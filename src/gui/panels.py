@@ -4,8 +4,9 @@ import tkinter as tk
 import os
 
 from utils import ioutils, pyutils
-from .mixins import Panel
 from .. import events
+
+from .abstracts import Panel
 
 
 class BlankPanel(Panel):

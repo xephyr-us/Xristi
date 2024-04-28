@@ -2,8 +2,9 @@
 import tkinter as tk
 
 from utils import ioutils, guiutils
-from . import panels, mixins
 from .. import events
+
+from . import panels, abstracts
 
 
 class RootWindow:
@@ -100,10 +101,10 @@ class RootWindow:
         self._tertiary_panel = panel
 
     def _verify_panel_class(self, panel_cls):
-        if not issubclass(panel_cls, mixins.Panel):
+        if not issubclass(panel_cls, abstracts.Panel):
             msg = self._PANEL_SUBCLS_ERR_MSG.format(
                 panel_cls.__name__,
-                mixins.Panel.__name__
+                abstracts.Panel.__name__
             )
             raise TypeError(msg)
 

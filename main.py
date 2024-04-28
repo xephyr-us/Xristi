@@ -1,5 +1,5 @@
-from src import RootWindow
 import src.events as events
+from src import RootWindow
 
 
 CONFIG = "./CONFIG"

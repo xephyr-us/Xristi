@@ -1,5 +1,5 @@
 
-from src.gui.mixins import Panel
+from src.gui.abstracts import Panel
 
 
 class GreenPanel(Panel):

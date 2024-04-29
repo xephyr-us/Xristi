@@ -1,3 +1,4 @@
+from PIL import Image, ImageTk
 import tkinter as tk
 
 
@@ -10,7 +11,7 @@ def configure_grid(widget, width, height):
         for x in range(width):
             widget.rowconfigure(index=x, weight=1)
         for y in range(height):
-            widget.columnconfigure(y, weight=1)
+            widget.columnconfigure(index=y, weight=1)
 
     except AttributeError:
         msg = GRID_CONF_ERR_MSG.format(type(widget).__name__)
@@ -50,3 +51,8 @@ def init_labeled_grid_widget(widget_cls, parent, label, *args, x=0, y=0, w=0, h=
     widget = widget_cls(frame, *args, **kwargs)
     widget.pack(fill=tk.BOTH, expand=True)
     return widget
+
+
+def build_icon(path, width, height):
+    image = Image.open(path).resize((width, height))
+    return ImageTk.PhotoImage(image)

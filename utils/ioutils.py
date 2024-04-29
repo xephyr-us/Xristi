@@ -25,6 +25,7 @@ def write_csv(path, *row):
 
 
 def read_key_value_file(path, casefold_keys=False, extend_filepaths=False):
+    path = os.path.abspath(path)
     contents = {}
     with open(path, "r") as file:
         for line in file.readlines():
@@ -37,6 +38,10 @@ def read_key_value_file(path, casefold_keys=False, extend_filepaths=False):
                 value = _extend_value_if_filepath(value, context)
             contents[key] = value
     return contents
+
+
+def read_config(path):
+    return read_key_value_file(path, casefold_keys=True, extend_filepaths=True)
 
 
 def absolute_subdirectories(path):

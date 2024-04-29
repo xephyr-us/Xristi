@@ -21,3 +21,7 @@ def getattr_if_present(obj, attr):
         return getattr(obj, attr)
     except AttributeError:
         return None
+
+
+def is_valid_subclass(cls, supercls):
+    return cls is not None and issubclass(cls, supercls)

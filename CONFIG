@@ -1,3 +1,4 @@
 TITLE=Xristi
 GEO=1280x720
+ICON=./assets/logo/portable.png
 TOOLS=./src/tools

@@ -1,9 +1,8 @@
 
-from PIL import Image, ImageTk
 import tkinter as tk
 import os
 
-from utils import ioutils, pyutils
+from utils import ioutils, pyutils, guiutils
 from .. import events
 
 from .abstracts import Panel
@@ -48,6 +47,12 @@ class ToolPanel(Panel):
     _SECONDARY_KEY = "second"
     _TERTIARY_KEY = "third"
 
+    _PANEL_KEYS = (
+        _PRIMARY_KEY,
+        _SECONDARY_KEY,
+        _TERTIARY_KEY
+    )
+
     @classmethod
     def title(cls):
         return cls._TITLE
@@ -68,24 +73,14 @@ class ToolPanel(Panel):
         return buttons
 
     def _build_button(self, manifest_path):
-        manifest = ioutils.read_key_value_file(
-            manifest_path,
-            casefold_keys=True,
-            extend_filepaths=True
-        )
-        module = ioutils.import_module_from_source(manifest[self._MODULE_KEY])
-        primary_cls_name = ioutils.value_if_mapped(manifest, self._PRIMARY_KEY)
-        primary_cls = pyutils.getattr_if_present(module, primary_cls_name)
-        secondary_cls_name = ioutils.value_if_mapped(manifest, self._SECONDARY_KEY)
-        secondary_cls = pyutils.getattr_if_present(module, secondary_cls_name)
-        tertiary_cls_name = ioutils.value_if_mapped(manifest, self._TERTIARY_KEY)
-        tertiary_cls = pyutils.getattr_if_present(module, tertiary_cls_name)
-        icon = self._build_icon(manifest[self._ICON_KEY])
+        manifest = ioutils.read_config(manifest_path)
+        primary_cls, secondary_cls, tertiary_cls = self._gather_panel_classes(manifest)
         command = self._build_button_command(
             primary_panel_cls=primary_cls,
             secondary_panel_cls=secondary_cls,
             tertiary_panel_cls=tertiary_cls
         )
+        icon = self._build_icon(manifest[self._ICON_KEY])
         return tk.Button(
             self._frame,
             text=manifest[self._NAME_KEY],
@@ -93,6 +88,15 @@ class ToolPanel(Panel):
             compound=tk.LEFT,
             command=command
         )
+
+    def _gather_panel_classes(self, manifest):
+        output = []
+        module = ioutils.import_module_from_source(manifest[self._MODULE_KEY])
+        for key in self._PANEL_KEYS:
+            cls_name = ioutils.value_if_mapped(manifest, key)
+            cls = pyutils.getattr_if_present(module, cls_name)
+            output.append(cls)
+        return output
 
     def _build_button_command(self, primary_panel_cls=None, secondary_panel_cls=None, tertiary_panel_cls=None):
         primary_update = self._build_panel_update_function(events.UPDATE_PRIMARY_PANEL, primary_panel_cls)
@@ -104,20 +108,17 @@ class ToolPanel(Panel):
             tertiary_update
         )
 
-    def _build_panel_update_function(self, event, panel_cls):
-        if panel_cls is not None and issubclass(panel_cls, Panel) and event in events.PANEL_UPDATE_EVENTS:
-            func = pyutils.package(
-                self._EVENT_STREAM.publish,
-                event,
-                panel_cls
-            )
-        else:
-            func = pyutils.ignore
-        return func
-
     def _build_icon(self, path):
-        image = Image.open(path)
-        image = image.resize((self._ICON_SIZE, self._ICON_SIZE))
-        icon = ImageTk.PhotoImage(image)
+        icon = guiutils.build_icon(
+            path,
+            self._ICON_SIZE,
+            self._ICON_SIZE
+        )
         self._icons.append(icon)
         return icon
+
+    def _build_panel_update_function(self, event, panel_cls):
+        if pyutils.is_valid_subclass(panel_cls, Panel) and event in events.PANEL_UPDATE_EVENTS:
+            return pyutils.package(self._EVENT_STREAM.publish, event, panel_cls)
+        else:
+            return pyutils.ignore

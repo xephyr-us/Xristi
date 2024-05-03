@@ -3,9 +3,9 @@ import tkinter as tk
 import os
 
 from utils import ioutils, pyutils, guiutils
-from .. import events
 
-from .abstracts import Panel
+from ..abstracts import Panel
+from .. import events
 
 
 class BlankPanel(Panel):

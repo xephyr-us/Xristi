@@ -2,6 +2,16 @@ import tkinter as tk
 import abc
 
 
+class Singleton(abc.ABC):
+
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = object.__new__(cls)
+        return cls._instance
+
+
 class WidgetWrapper(abc.ABC):
 
     _ATTR_ERR_MSG = "No attribute {} found in class {}"

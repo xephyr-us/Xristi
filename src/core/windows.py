@@ -2,9 +2,9 @@
 import tkinter as tk
 
 from utils import ioutils, guiutils
-from .. import events
+from .. import events, abstracts
 
-from . import panels, abstracts
+from . import panels
 
 
 class RootWindow:

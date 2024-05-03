@@ -1,3 +1,5 @@
+from .abstracts import Singleton
+
 
 UPDATE_PRIMARY_PANEL = 0
 UPDATE_SECONDARY_PANEL = 1
@@ -10,14 +12,9 @@ PANEL_UPDATE_EVENTS = {
 }
 
 
-class EventStream:
+class EventStream(Singleton):
 
     _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(EventStream, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
 
     def __init__(self):
         self.__mappings = {}

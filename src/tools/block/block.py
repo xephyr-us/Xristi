@@ -1,5 +1,5 @@
 
-from src.gui.abstracts import Panel
+from src.abstracts import Panel
 
 
 class GreenPanel(Panel):

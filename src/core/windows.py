@@ -30,8 +30,21 @@ class RootWindow:
     _ICON_KEY = "icon"
     _TOOLS_KEY = "tools"
 
+    @staticmethod
+    def _primary_panel_key(panel_cls):
+        return f"{panel_cls.__name__}1"
+
+    @staticmethod
+    def _secondary_panel_key(panel_cls):
+        return f"{panel_cls.__name__}2"
+
+    @staticmethod
+    def _tertiary_panel_key(panel_cls):
+        return f"{panel_cls.__name__}3"
+
     def __init__(self, config):
         self._config_path = config
+        self._cache = {}
         self._relaunch = False
         self._config = None
         self._root = None
@@ -64,7 +77,11 @@ class RootWindow:
         return root
 
     def _set_primary_panel(self, panel_cls, *args, **kwargs):
+        if isinstance(self._primary_panel, panel_cls):
+            return
         self._verify_panel_class(panel_cls)
+        cached = ioutils.value_if_mapped(self._cache, self._primary_panel_key(panel_cls))
+        # TODO Allow root window to cache panels
         panel = guiutils.init_labeled_grid_widget(
             panel_cls,
             self._root,
@@ -81,6 +98,8 @@ class RootWindow:
         self._primary_panel = panel
 
     def _set_secondary_panel(self, panel_cls, *args, **kwargs):
+        if isinstance(self._secondary_panel, panel_cls):
+            return
         self._verify_panel_class(panel_cls)
         panel = guiutils.init_labeled_grid_widget(
             panel_cls,
@@ -98,6 +117,8 @@ class RootWindow:
         self._secondary_panel = panel
 
     def _set_tertiary_panel(self, panel_cls, *args, **kwargs):
+        if isinstance(self._tertiary_panel, panel_cls):
+            return
         self._verify_panel_class(panel_cls)
         panel = guiutils.init_labeled_grid_widget(
             panel_cls,

@@ -1,13 +1,22 @@
 
+import tkinter as tk
+
+# Imported for reference by MANIFEST
+from src.core.panels import BlankPanel
+
 from src.abstracts import Panel
 
 
-class BluePanel(Panel):
+class SleepPanel(Panel):
 
     @classmethod
     def title(cls):
-        return "Blue :/"
+        return "Sleep Log"
 
     def __init__(self, parent):
         super().__init__(parent)
-        self._frame.configure(bg="blue")
+        self._init_label("Sleep Charts")
+
+    def _init_label(self, text):
+        label = tk.Label(self._frame, text=text, fg="blue")
+        label.place(anchor=tk.CENTER, relx=0.5, rely=0.5)

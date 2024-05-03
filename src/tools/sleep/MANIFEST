@@ -1,4 +1,5 @@
 name=Sleep Log
 icon=./sleep.png
 content=./sleep.py
-second=BluePanel
+second=BlankPanel
+third=SleepPanel

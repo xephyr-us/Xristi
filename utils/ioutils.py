@@ -1,5 +1,6 @@
 from importlib.machinery import SourceFileLoader
 import csv
+import sys
 import os
 
 
@@ -79,3 +80,7 @@ def _extend_value_if_filepath(value, context):
 
 def value_if_mapped(d, key):
     return d[key] if key in d.keys() else None
+
+
+def get_cwd():
+    return os.path.split(sys.argv[0])[0]

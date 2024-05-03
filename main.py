@@ -1,7 +1,11 @@
+import sys
+import os
+
 from src import RootWindow
+from utils import ioutils
 
 
-CONFIG = "./CONFIG"
+CONFIG = f"{ioutils.get_cwd()}/CONFIG"
 
 
 def main():

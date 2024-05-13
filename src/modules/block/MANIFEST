@@ -1,0 +1,5 @@
+name=Blocklist
+icon=./block.png
+content=./block.py
+second=BlankPanel
+third=BlockPanel

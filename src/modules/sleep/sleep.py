@@ -9,9 +9,7 @@ from src.abstracts import Panel
 
 class SleepPanel(Panel):
 
-    @classmethod
-    def title(cls):
-        return "Sleep Log"
+    _TITLE = "Sleep Log"
 
     def __init__(self, parent):
         super().__init__(parent)

@@ -10,9 +10,7 @@ from src.abstracts import Panel
 
 class BlockPanel(Panel):
 
-    @classmethod
-    def title(cls):
-        return "Blocklist"
+    _TITLE = "Blocklist"
 
     def __init__(self, parent):
         super().__init__(parent)

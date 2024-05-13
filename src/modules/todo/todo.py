@@ -9,9 +9,7 @@ from src.abstracts import Panel
 
 class ToDoPanel(Panel):
 
-    @classmethod
-    def title(cls):
-        return "To-do List"
+    _TITLE = "To-do List"
 
     def __init__(self, parent):
         super().__init__(parent)

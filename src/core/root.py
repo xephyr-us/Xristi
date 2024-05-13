@@ -5,7 +5,7 @@ from ..event_handling import EventStream, Events
 from utils import ioutils, guiutils
 from .. import abstracts
 
-from . import panels, widgets
+from . import panels
 
 
 class RootWindow:
@@ -88,13 +88,28 @@ class RootWindow:
         guiutils.configure_grid(root, self._GRID_WIDTH, self._GRID_HEIGHT)
         return root
 
+    def _init_panel(self, panel_cls, current_panel, *args, **kwargs):
+        if isinstance(current_panel, panel_cls):
+            return
+        self._verify_panel_class(panel_cls)
+        if current_panel is not None:
+            current_panel.grid_forget()
+        new_panel = self._get_cachable_panel(panel_cls, "KEY", *args, **kwargs)
+        new_panel.grid(
+            # **(Current panel coords)
+            padx=self._PANEL_PAD_X,
+            pady=self._PANEL_PAD_Y,
+            sticky=tk.NSEW
+        )
+        # Update panel reference
+
     def _set_primary_panel(self, panel_cls, *args, **kwargs):
         if isinstance(self._primary_panel, panel_cls):
             return
         if self._primary_panel is not None:
             self._primary_panel.master.grid_forget()
-        labeled = self._get_cachable_labeled_panel(panel_cls, self._primary_panel_key(panel_cls), *args, **kwargs)
-        labeled.grid(
+        panel = self._get_cachable_panel(panel_cls, self._primary_panel_key(panel_cls), *args, **kwargs)
+        panel.grid(
             column=0,
             row=0,
             columnspan=self._PRIMARY_PANEL_WIDTH,
@@ -103,15 +118,15 @@ class RootWindow:
             pady=self._PANEL_PAD_Y,
             sticky=tk.NSEW
         )
-        self._primary_panel = labeled.widget
+        self._primary_panel = panel
 
     def _set_secondary_panel(self, panel_cls, *args, **kwargs):
         if isinstance(self._secondary_panel, panel_cls):
             return
         if self._secondary_panel is not None:
             self._secondary_panel.master.grid_forget()
-        labeled = self._get_cachable_labeled_panel(panel_cls, self._secondary_panel_key(panel_cls), *args, **kwargs)
-        labeled.grid(
+        panel = self._get_cachable_panel(panel_cls, self._secondary_panel_key(panel_cls), *args, **kwargs)
+        panel.grid(
             column=0,
             row=self._PRIMARY_PANEL_HEIGHT,
             columnspan=self._PRIMARY_PANEL_WIDTH,
@@ -120,16 +135,16 @@ class RootWindow:
             pady=self._PANEL_PAD_Y,
             sticky=tk.NSEW
         )
-        self._secondary_panel = labeled.widget
+        self._secondary_panel = panel
 
     def _set_tertiary_panel(self, panel_cls, *args, **kwargs):
         if isinstance(self._tertiary_panel, panel_cls):
             return
         self._verify_panel_class(panel_cls)
         if self._tertiary_panel is not None:
-            self._tertiary_panel.master.grid_forget()
-        labeled = self._get_cachable_labeled_panel(panel_cls, self._tertiary_panel_key(panel_cls), *args, **kwargs)
-        labeled.grid(
+            self._tertiary_panel.grid_forget()
+        panel = self._get_cachable_panel(panel_cls, self._tertiary_panel_key(panel_cls), *args, **kwargs)
+        panel.grid(
             column=self._PRIMARY_PANEL_WIDTH,
             row=0,
             columnspan=self._GRID_WIDTH - self._PRIMARY_PANEL_WIDTH,
@@ -138,22 +153,20 @@ class RootWindow:
             pady=self._PANEL_PAD_Y,
             sticky=tk.NSEW
         )
-        self._tertiary_panel = labeled.widget
+        self._tertiary_panel = panel
 
-    def _get_cachable_labeled_panel(self, panel_cls, cache_key, *args, **kwargs):
+    def _get_cachable_panel(self, panel_cls, cache_key, *args, **kwargs):
         self._verify_panel_class(panel_cls)
         cached = ioutils.value_if_mapped(self._cache, cache_key)
         if cached is not None:
             return cached
-        labeled = widgets.LabeledWidget(
-            panel_cls,
+        panel = panel_cls(
             self._root,
-            panel_cls.title(),
             *args,
             **kwargs
         )
-        self._cache[cache_key] = labeled
-        return labeled
+        self._cache[cache_key] = panel
+        return panel
 
     def _verify_panel_class(self, panel_cls):
         if not issubclass(panel_cls, abstracts.Panel):

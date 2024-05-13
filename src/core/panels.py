@@ -9,14 +9,7 @@ from ..abstracts import Panel
 
 class BlankPanel(Panel):
 
-    _ZERO_WIDTH_SPACE = "​"
     _LABEL_COLOR = "#858383"
-
-    @classmethod
-    def title(cls):
-        # A zero-width space is returned such that the label frame pads the top of the frame as if it
-        # contained text, matching the padding of the adjacent panel.
-        return cls._ZERO_WIDTH_SPACE
 
     def __init__(self, parent, label=None):
         super().__init__(parent)
@@ -54,12 +47,8 @@ class ToolPanel(Panel):
         _TERTIARY_KEY
     )
 
-    @classmethod
-    def title(cls):
-        return cls._TITLE
-
     def __init__(self, parent, modules_path):
-        super().__init__(parent)
+        super().__init__(parent,)
         self._icons = set()  # Maintains references to icons such that they are not garbage collected
         self._buttons = self._init_buttons(modules_path)
 

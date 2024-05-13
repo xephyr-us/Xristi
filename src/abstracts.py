@@ -16,8 +16,8 @@ class WidgetWrapper(abc.ABC):
 
     _ATTR_ERR_MSG = "No attribute {} found in class {}"
 
-    def __init__(self, widget_cls, parent):
-        self._wrapped = widget_cls(parent)
+    def __init__(self, widget_cls, parent, *args, **kwargs):
+        self._wrapped = widget_cls(parent, *args, **kwargs)
 
     def __getattr__(self, item):
         try:

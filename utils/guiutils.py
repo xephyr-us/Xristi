@@ -1,6 +1,8 @@
 from PIL import Image, ImageTk
 import tkinter as tk
 
+from src.core.widgets import LabeledWidget
+
 
 GRID_CONF_ERR_MSG = "Cannot configure object of class {} as a grid widget"
 INIT_GRID_WIDGET_ERR_MSG = "Cannot instantiate grid widget; check 'widget_cls' argument?"
@@ -34,23 +36,6 @@ def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady
 
     except TypeError:
         raise TypeError(INIT_GRID_WIDGET_ERR_MSG)
-
-
-def init_labeled_grid_widget(widget_cls, parent, label, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, **kwargs):
-    frame = init_grid_widget(
-        tk.LabelFrame,
-        parent,
-        x=x,
-        y=y,
-        w=w,
-        h=h,
-        padx=padx,
-        pady=pady
-    )
-    frame.configure(text=label)
-    widget = widget_cls(frame, *args, **kwargs)
-    widget.pack(fill=tk.BOTH, expand=True)
-    return widget
 
 
 def build_icon(path, width, height):

@@ -17,7 +17,6 @@ class BlockPanel(Panel):
     def __init__(self, parent):
         super().__init__(parent)
         self._init_label("Blocked Sites")
-        print(ioutils.get_cwd())
 
     def _init_label(self, text):
         label = tk.Label(self._frame, text=text, fg="red")

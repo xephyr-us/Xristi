@@ -14,9 +14,11 @@ class Singleton(abc.ABC):
 
 class WidgetWrapper(abc.ABC):
 
+    _INV_WIDGET_CLS_ERR_MSG = "Invalid widget class {} passed to {}"
     _ATTR_ERR_MSG = "No attribute {} found in class {}"
 
     def __init__(self, widget_cls, parent, *args, **kwargs):
+        self._validate_widget_class(widget_cls)
         self._wrapped = widget_cls(parent, *args, **kwargs)
 
     def __getattr__(self, item):
@@ -25,6 +27,14 @@ class WidgetWrapper(abc.ABC):
         except AttributeError:
             msg = self._ATTR_ERR_MSG.format(str(item), self.__class__.__name__)
             raise AttributeError(msg)
+
+    def _validate_widget_class(self, widget_cls):
+        if not issubclass(widget_cls, tk.Widget):
+            msg = self._INV_WIDGET_CLS_ERR_MSG.format(
+                widget_cls.__name__,
+                self.__class__.__name__
+            )
+            raise TypeError(msg)
 
 
 class Panel(WidgetWrapper, metaclass=abc.ABCMeta):

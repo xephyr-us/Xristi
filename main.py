@@ -1,6 +1,3 @@
-import sys
-import os
-
 from src import RootWindow
 from utils import ioutils
 

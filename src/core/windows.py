@@ -1,19 +1,19 @@
 
 import tkinter as tk
 
+from ..event_handling import EventStream, Events
 from utils import ioutils, guiutils
-from .. import events, abstracts
+from .. import abstracts
 
 from . import panels, widgets
 
 
 class RootWindow:
 
-    _EVENT_STREAM = events.EventStream()
+    _EVENT_STREAM = EventStream()
 
     _GRID_WIDTH = 50
     _GRID_HEIGHT = 50
-
     _PRIMARY_PANEL_WIDTH = 11   # Relative to _GRID_WIDTH
     _PRIMARY_PANEL_HEIGHT = 24  # Relative to _GRID_HEIGHT
 
@@ -25,10 +25,10 @@ class RootWindow:
     _PANEL_SUBCLS_ERR_MSG = "Class {} is not a subclass of {}"
     _BLANK_PANEL_MSG = "Select a tool to begin"
 
-    _TITLE_KEY = "title"
+    _MODULES_PATH_KEY = "modules"
     _GEOMETRY_KEY = "geo"
+    _TITLE_KEY = "title"
     _ICON_KEY = "icon"
-    _TOOLS_KEY = "tools"
 
     @staticmethod
     def _primary_panel_key(panel_cls):
@@ -44,9 +44,9 @@ class RootWindow:
 
     def __init__(self, config):
         self._config_path = config
+        self._config = {}
         self._cache = {}
         self._relaunch = False
-        self._config = None
         self._root = None
         self._primary_panel = None
         self._secondary_panel = None
@@ -54,14 +54,26 @@ class RootWindow:
         self._subscribe_to_events()
 
     def _initialize(self):
+        self._clear_cached_values()
         self._relaunch = False
         self._config = ioutils.read_config(self._config_path)
         self._root = self._init_root()
+        self._EVENT_STREAM.publish(Events.UPDATE_PRIMARY_PANEL, panels.ToolPanel, self._config[self._MODULES_PATH_KEY])
+        self._EVENT_STREAM.publish(Events.UPDATE_SECONDARY_PANEL, panels.BlankPanel)
+        self._EVENT_STREAM.publish(Events.UPDATE_TERTIARY_PANEL, panels.BlankPanel, self._BLANK_PANEL_MSG)
 
     def _subscribe_to_events(self):
-        self._EVENT_STREAM.subscribe(events.UPDATE_PRIMARY_PANEL, self._set_primary_panel)
-        self._EVENT_STREAM.subscribe(events.UPDATE_SECONDARY_PANEL, self._set_secondary_panel)
-        self._EVENT_STREAM.subscribe(events.UPDATE_TERTIARY_PANEL, self._set_tertiary_panel)
+        self._EVENT_STREAM.subscribe(Events.UPDATE_PRIMARY_PANEL, self._set_primary_panel)
+        self._EVENT_STREAM.subscribe(Events.UPDATE_SECONDARY_PANEL, self._set_secondary_panel)
+        self._EVENT_STREAM.subscribe(Events.UPDATE_TERTIARY_PANEL, self._set_tertiary_panel)
+
+    def _clear_cached_values(self):
+        self._config.clear()
+        self._cache.clear()
+        self._root = None
+        self._primary_panel = None
+        self._secondary_panel = None
+        self._tertiary_panel = None
 
     def _init_root(self):
         root = tk.Tk()
@@ -131,17 +143,16 @@ class RootWindow:
     def _get_cachable_labeled_panel(self, panel_cls, cache_key, *args, **kwargs):
         self._verify_panel_class(panel_cls)
         cached = ioutils.value_if_mapped(self._cache, cache_key)
-        if cached is None:
-            labeled = widgets.LabeledWidget(
-                panel_cls,
-                self._root,
-                panel_cls.title(),
-                *args,
-                **kwargs
-            )
-            self._cache[cache_key] = labeled
-        else:
-            labeled = cached
+        if cached is not None:
+            return cached
+        labeled = widgets.LabeledWidget(
+            panel_cls,
+            self._root,
+            panel_cls.title(),
+            *args,
+            **kwargs
+        )
+        self._cache[cache_key] = labeled
         return labeled
 
     def _verify_panel_class(self, panel_cls):
@@ -154,9 +165,6 @@ class RootWindow:
 
     def launch(self):
         self._initialize()
-        self._EVENT_STREAM.publish(events.UPDATE_PRIMARY_PANEL, panels.ToolPanel, self._config[self._TOOLS_KEY])
-        self._EVENT_STREAM.publish(events.UPDATE_SECONDARY_PANEL, panels.BlankPanel)
-        self._EVENT_STREAM.publish(events.UPDATE_TERTIARY_PANEL, panels.BlankPanel, self._BLANK_PANEL_MSG)
         self._root.mainloop()
         self._root.quit()
         return self._relaunch

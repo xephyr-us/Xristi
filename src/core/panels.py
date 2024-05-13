@@ -2,15 +2,14 @@
 import tkinter as tk
 import os
 
+from ..event_handling import EventStream, Events
 from utils import ioutils, pyutils, guiutils
-
 from ..abstracts import Panel
-from .. import events
 
 
 class BlankPanel(Panel):
-    _ZERO_WIDTH_SPACE = "​"
 
+    _ZERO_WIDTH_SPACE = "​"
     _LABEL_COLOR = "#858383"
 
     @classmethod
@@ -27,18 +26,20 @@ class BlankPanel(Panel):
         if content is None:
             return
         text = str(content)
-        if text:
-            label = tk.Label(self._frame, text=text, fg=self._LABEL_COLOR)
-            label.place(anchor=tk.CENTER, relx=0.5, rely=0.5)
+        label = tk.Label(self._frame, text=text, fg=self._LABEL_COLOR)
+        label.place(anchor=tk.CENTER, relx=0.5, rely=0.5)
 
 
 class ToolPanel(Panel):
 
-    _EVENT_STREAM = events.EventStream()
+    _EVENT_STREAM = EventStream()
+
+    _MANIFEST_FILENAME = "MANIFEST"
 
     _TITLE = "Tools"
-    _MANIFEST_FILENAME = "MANIFEST"
-    _ICON_SIZE = 35  # Pixels
+
+    # Pixels
+    _ICON_SIZE = 35
 
     _NAME_KEY = "name"
     _ICON_KEY = "icon"
@@ -57,14 +58,14 @@ class ToolPanel(Panel):
     def title(cls):
         return cls._TITLE
 
-    def __init__(self, parent, modules_dir):
+    def __init__(self, parent, modules_path):
         super().__init__(parent)
-        self._icons = []  # Maintains references to icons such that they are not garbage collected
-        self._buttons = self._init_buttons(modules_dir)
+        self._icons = set()  # Maintains references to icons such that they are not garbage collected
+        self._buttons = self._init_buttons(modules_path)
 
-    def _init_buttons(self, modules):
+    def _init_buttons(self, modules_path):
         buttons = []
-        for subdir in ioutils.absolute_subdirectories(modules):
+        for subdir in ioutils.absolute_subdirectories(modules_path):
             if ioutils.is_in_directory(self._MANIFEST_FILENAME, subdir):
                 manifest_path = os.path.join(subdir, self._MANIFEST_FILENAME)
                 button = self._build_button(manifest_path)
@@ -76,9 +77,9 @@ class ToolPanel(Panel):
         manifest = ioutils.read_config(manifest_path)
         primary_cls, secondary_cls, tertiary_cls = self._gather_panel_classes(manifest)
         command = self._build_button_command(
-            primary_panel_cls=primary_cls,
-            secondary_panel_cls=secondary_cls,
-            tertiary_panel_cls=tertiary_cls
+            primary_cls,
+            secondary_cls,
+            tertiary_cls
         )
         icon = self._build_icon(manifest[self._ICON_KEY])
         return tk.Button(
@@ -99,9 +100,9 @@ class ToolPanel(Panel):
         return output
 
     def _build_button_command(self, primary_panel_cls=None, secondary_panel_cls=None, tertiary_panel_cls=None):
-        primary_update = self._build_panel_update_function(events.UPDATE_PRIMARY_PANEL, primary_panel_cls)
-        secondary_update = self._build_panel_update_function(events.UPDATE_SECONDARY_PANEL, secondary_panel_cls)
-        tertiary_update = self._build_panel_update_function(events.UPDATE_TERTIARY_PANEL, tertiary_panel_cls)
+        primary_update = self._build_panel_update_function(Events.UPDATE_PRIMARY_PANEL, primary_panel_cls)
+        secondary_update = self._build_panel_update_function(Events.UPDATE_SECONDARY_PANEL, secondary_panel_cls)
+        tertiary_update = self._build_panel_update_function(Events.UPDATE_TERTIARY_PANEL, tertiary_panel_cls)
         return pyutils.invoke(
             primary_update,
             secondary_update,
@@ -114,11 +115,11 @@ class ToolPanel(Panel):
             self._ICON_SIZE,
             self._ICON_SIZE
         )
-        self._icons.append(icon)
+        self._icons.add(icon)
         return icon
 
     def _build_panel_update_function(self, event, panel_cls):
-        if pyutils.is_valid_subclass(panel_cls, Panel) and event in events.PANEL_UPDATE_EVENTS:
+        if pyutils.is_valid_subclass(panel_cls, Panel) and event in Events:
             return pyutils.package(self._EVENT_STREAM.publish, event, panel_cls)
         else:
             return pyutils.ignore

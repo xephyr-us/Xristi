@@ -1,8 +1,6 @@
 from PIL import Image, ImageTk
 import tkinter as tk
 
-from src.core.widgets import LabeledWidget
-
 
 GRID_CONF_ERR_MSG = "Cannot configure object of class {} as a grid widget"
 INIT_GRID_WIDGET_ERR_MSG = "Cannot instantiate grid widget; check 'widget_cls' argument?"

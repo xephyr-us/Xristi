@@ -44,8 +44,8 @@ class Panel(WidgetWrapper, metaclass=abc.ABCMeta):
     # A zero-width space is used as the default title such that the empty label pads the top of the
     # frame as if it contained text, matching the padding of filled labels
 
-    def __init__(self, parent):
-        super().__init__(tk.LabelFrame, parent)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(tk.LabelFrame, parent, *args, **kwargs)
         self._frame = self._wrapped
         self._frame.config(text=self._TITLE)
 

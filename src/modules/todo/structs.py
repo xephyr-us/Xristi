@@ -6,15 +6,23 @@ class Registrar:
     _NULL_VALUE_ERR_MSG = "{} cannot accept null values"
     _NULL_TAG_ERR_MSG = "Values cannot be tagged with null inside {}"
 
-    def __init__(self):
+    def __init__(self, *args):
         self._size = 0
         self._deletions = 0
         self._values = []
         self._indices = {}
         self._tags = {}
+        for arg in args:
+            self.register(arg)
 
     def __iter__(self):
         return _RegistrarIterator(self._values)
+
+    def __len__(self):
+        return self._size - self._deletions
+
+    def __contains__(self, item):
+        return item in self._indices.keys()
 
     def _validate_value(self, v):
         if v is None:
@@ -54,12 +62,13 @@ class Registrar:
         self._tag_index(index, tags)
 
     def deregister(self, value):
-        index = self._indices[value]
-        del self._indices[value]
-        self._values[index] = None
-        self._deletions += 1
-        if self._deletions >= self._NULL_THRESHOLD:
-            self._consolidate_data()
+        if value in self:
+            index = self._indices[value]
+            del self._indices[value]
+            self._values[index] = None
+            self._deletions += 1
+            if self._deletions >= self._NULL_THRESHOLD:
+                self._consolidate_data()
 
     def collect(self, tag):
         output = []
@@ -70,6 +79,13 @@ class Registrar:
                 if value is not None:
                     output.append(value)
         return output
+
+    def is_tagged(self, value, tag):
+        if value not in self:
+            return None
+        if tag not in self._tags.keys():
+            return False
+        return self._indices[value] in self._tags[tag]
 
 
 class _RegistrarIterator:

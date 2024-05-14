@@ -18,7 +18,7 @@ def configure_grid(widget, width, height):
         raise TypeError(msg)
 
 
-def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, **kwargs):
+def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, sticky=tk.NSEW, **kwargs):
     try:
         widget = widget_cls(parent, *args, **kwargs)
         widget.grid(
@@ -26,7 +26,7 @@ def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady
             column=x,
             rowspan=h,
             columnspan=w,
-            sticky=tk.NSEW,
+            sticky=sticky,
             padx=padx,
             pady=pady
         )

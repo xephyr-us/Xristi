@@ -28,7 +28,12 @@ class TaskPanel(Panel):
         )
         self._task_frame = self._init_task_frame()
         self._init_build_button()
-        self._tasks = Registrar("Hello!", "again", "my old", "friend :}")
+        self._tasks = Registrar(
+            "Hello!",
+            "again",
+            ":)",
+            "my old friend <3"
+        )
         self._render_tasks()
 
     def _init_task_frame(self):
@@ -54,15 +59,18 @@ class TaskPanel(Panel):
         )
         return button
 
-    def _add_task(self, name):
-        self._tasks.register(name)
+    def _build_dummy_tasks(self):
+        pass
 
-    def _remove_task(self, name):
-        self._tasks.deregister(name)
+    def _add_task(self, title):
+        self._tasks.register(title)
+
+    def _remove_task(self, title):
+        self._tasks.deregister(title)
 
     def _render_tasks(self):
         for task in self._tasks:
-            widget = TaskWidget(self._task_frame, task)
+            widget = TaskWidget(self._task_frame, task, subtitle="Subtitle!", subtitle_color="blue")
             widget.pack(fill=tk.X, pady=2, padx=5)
 
 

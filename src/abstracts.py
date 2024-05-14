@@ -1,5 +1,8 @@
+
 import tkinter as tk
 import abc
+
+from utils.pyutils import ZERO_WIDTH_SPACE
 
 
 class Singleton(abc.ABC):
@@ -39,8 +42,7 @@ class WidgetWrapper(abc.ABC):
 
 class Panel(WidgetWrapper, metaclass=abc.ABCMeta):
 
-    _ZERO_WIDTH_SPACE = "​"
-    _TITLE = _ZERO_WIDTH_SPACE
+    _TITLE = ZERO_WIDTH_SPACE
     # A zero-width space is used as the default title such that the empty label pads the top of the
     # frame as if it contained text, matching the padding of filled labels
 

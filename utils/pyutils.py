@@ -1,4 +1,7 @@
 
+ZERO_WIDTH_SPACE = "​"
+
+
 def package(func, *args, **kwargs):
     return lambda: func(*args, **kwargs)
 

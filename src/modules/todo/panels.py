@@ -1,10 +1,10 @@
 
-from collections import deque
 import tkinter as tk
 
 from src.abstracts import Panel
 
-from src.modules.todo import TaskWidget
+from src.modules.todo.widgets import TaskWidget
+from src.modules.todo.structs import Registrar
 
 
 class TaskPanel(Panel):

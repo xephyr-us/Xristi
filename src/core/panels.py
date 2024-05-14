@@ -89,9 +89,9 @@ class ToolPanel(Panel):
         return output
 
     def _build_button_command(self, primary_panel_cls=None, secondary_panel_cls=None, tertiary_panel_cls=None):
-        primary_update = self._build_panel_update_function(Events.UPDATE_PRIMARY_PANEL, primary_panel_cls)
-        secondary_update = self._build_panel_update_function(Events.UPDATE_SECONDARY_PANEL, secondary_panel_cls)
-        tertiary_update = self._build_panel_update_function(Events.UPDATE_TERTIARY_PANEL, tertiary_panel_cls)
+        primary_update = self._build_panel_update_function(Events.SET_PRIMARY_PANEL, primary_panel_cls)
+        secondary_update = self._build_panel_update_function(Events.SET_SECONDARY_PANEL, secondary_panel_cls)
+        tertiary_update = self._build_panel_update_function(Events.SET_TERTIARY_PANEL, tertiary_panel_cls)
         return pyutils.invoke(
             primary_update,
             secondary_update,

@@ -59,14 +59,14 @@ class RootWindow:
         self._relaunch = False
         self._config = ioutils.read_config(self._config_path)
         self._root = self._init_root()
-        self._EVENT_STREAM.publish(Events.UPDATE_PRIMARY_PANEL, panels.ToolPanel, self._config[self._MODULES_PATH_KEY])
-        self._EVENT_STREAM.publish(Events.UPDATE_SECONDARY_PANEL, panels.BlankPanel)
-        self._EVENT_STREAM.publish(Events.UPDATE_TERTIARY_PANEL, panels.BlankPanel, self._BLANK_PANEL_MSG)
+        self._EVENT_STREAM.publish(Events.SET_PRIMARY_PANEL, panels.ToolPanel, self._config[self._MODULES_PATH_KEY])
+        self._EVENT_STREAM.publish(Events.SET_SECONDARY_PANEL, panels.BlankPanel)
+        self._EVENT_STREAM.publish(Events.SET_TERTIARY_PANEL, panels.BlankPanel, self._BLANK_PANEL_MSG)
 
     def _subscribe_to_events(self):
-        self._EVENT_STREAM.subscribe(Events.UPDATE_PRIMARY_PANEL, self._set_primary_panel)
-        self._EVENT_STREAM.subscribe(Events.UPDATE_SECONDARY_PANEL, self._set_secondary_panel)
-        self._EVENT_STREAM.subscribe(Events.UPDATE_TERTIARY_PANEL, self._set_tertiary_panel)
+        self._EVENT_STREAM.subscribe(Events.SET_PRIMARY_PANEL, self._set_primary_panel)
+        self._EVENT_STREAM.subscribe(Events.SET_SECONDARY_PANEL, self._set_secondary_panel)
+        self._EVENT_STREAM.subscribe(Events.SET_TERTIARY_PANEL, self._set_tertiary_panel)
 
     def _clear_cached_values(self):
         self._config.clear()

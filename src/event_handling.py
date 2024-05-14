@@ -5,9 +5,9 @@ from .abstracts import Singleton
 
 
 class Events(Enum):
-    UPDATE_PRIMARY_PANEL = 0
-    UPDATE_SECONDARY_PANEL = 1
-    UPDATE_TERTIARY_PANEL = 2
+    SET_PRIMARY_PANEL = 0
+    SET_SECONDARY_PANEL = 1
+    SET_TERTIARY_PANEL = 2
 
 
 class EventStream(Singleton):

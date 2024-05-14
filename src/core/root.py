@@ -3,6 +3,7 @@ import tkinter as tk
 
 from ..event_handling import EventStream, Events
 from utils import ioutils, guiutils
+from utils.pyutils import Reference
 from .. import abstracts
 
 from . import panels
@@ -31,15 +32,15 @@ class RootWindow:
     _ICON_KEY = "icon"
 
     @staticmethod
-    def _primary_panel_key(panel_cls):
+    def _primary_panel_keygen(panel_cls):
         return f"{panel_cls.__name__}1"
 
     @staticmethod
-    def _secondary_panel_key(panel_cls):
+    def _secondary_panel_keygen(panel_cls):
         return f"{panel_cls.__name__}2"
 
     @staticmethod
-    def _tertiary_panel_key(panel_cls):
+    def _tertiary_panel_keygen(panel_cls):
         return f"{panel_cls.__name__}3"
 
     def __init__(self, config):
@@ -48,9 +49,9 @@ class RootWindow:
         self._cache = {}
         self._relaunch = False
         self._root = None
-        self._primary_panel = None
-        self._secondary_panel = None
-        self._tertiary_panel = None
+        self._primary_panel_ref = Reference()
+        self._secondary_panel_ref = Reference()
+        self._tertiary_panel_ref = Reference()
         self._subscribe_to_events()
 
     def _initialize(self):
@@ -71,9 +72,9 @@ class RootWindow:
         self._config.clear()
         self._cache.clear()
         self._root = None
-        self._primary_panel = None
-        self._secondary_panel = None
-        self._tertiary_panel = None
+        self._primary_panel_ref(None)
+        self._secondary_panel_ref(None)
+        self._tertiary_panel_ref(None)
 
     def _init_root(self):
         root = tk.Tk()
@@ -88,72 +89,66 @@ class RootWindow:
         guiutils.configure_grid(root, self._GRID_WIDTH, self._GRID_HEIGHT)
         return root
 
-    def _init_panel(self, panel_cls, current_panel, *args, **kwargs):
-        if isinstance(current_panel, panel_cls):
+    def _init_panel(self, panel_cls, panel_ref, keygen, *args, x=0, y=0, w=0, h=0, **kwargs):
+        if not isinstance(panel_ref, Reference) or isinstance(panel_ref(), panel_cls):
             return
-        self._verify_panel_class(panel_cls)
-        if current_panel is not None:
-            current_panel.grid_forget()
-        new_panel = self._get_cachable_panel(panel_cls, "KEY", *args, **kwargs)
-        new_panel.grid(
-            # **(Current panel coords)
+        if panel_ref() is not None:
+            panel_ref().grid_forget()
+        panel = self._get_cachable_panel(
+            panel_cls,
+            keygen(panel_cls),
+            *args,
+            *kwargs
+        )
+        panel.grid(
+            column=x,
+            row=y,
+            columnspan=w,
+            rowspan=h,
             padx=self._PANEL_PAD_X,
             pady=self._PANEL_PAD_Y,
             sticky=tk.NSEW
         )
-        # Update panel reference
+        panel_ref(panel)
 
     def _set_primary_panel(self, panel_cls, *args, **kwargs):
-        if isinstance(self._primary_panel, panel_cls):
-            return
-        if self._primary_panel is not None:
-            self._primary_panel.master.grid_forget()
-        panel = self._get_cachable_panel(panel_cls, self._primary_panel_key(panel_cls), *args, **kwargs)
-        panel.grid(
-            column=0,
-            row=0,
-            columnspan=self._PRIMARY_PANEL_WIDTH,
-            rowspan=self._PRIMARY_PANEL_HEIGHT,
-            padx=self._PANEL_PAD_X,
-            pady=self._PANEL_PAD_Y,
-            sticky=tk.NSEW
+        self._init_panel(
+            panel_cls,
+            self._primary_panel_ref,
+            self._primary_panel_keygen,
+            *args,
+            x=0,
+            y=0,
+            w=self._PRIMARY_PANEL_WIDTH,
+            h=self._PRIMARY_PANEL_HEIGHT,
+            **kwargs
         )
-        self._primary_panel = panel
 
     def _set_secondary_panel(self, panel_cls, *args, **kwargs):
-        if isinstance(self._secondary_panel, panel_cls):
-            return
-        if self._secondary_panel is not None:
-            self._secondary_panel.master.grid_forget()
-        panel = self._get_cachable_panel(panel_cls, self._secondary_panel_key(panel_cls), *args, **kwargs)
-        panel.grid(
-            column=0,
-            row=self._PRIMARY_PANEL_HEIGHT,
-            columnspan=self._PRIMARY_PANEL_WIDTH,
-            rowspan=self._GRID_HEIGHT - self._PRIMARY_PANEL_HEIGHT,
-            padx=self._PANEL_PAD_X,
-            pady=self._PANEL_PAD_Y,
-            sticky=tk.NSEW
+        self._init_panel(
+            panel_cls,
+            self._secondary_panel_ref,
+            self._secondary_panel_keygen,
+            *args,
+            x=0,
+            y=self._PRIMARY_PANEL_HEIGHT,
+            w=self._PRIMARY_PANEL_WIDTH,
+            h=self._GRID_HEIGHT - self._PRIMARY_PANEL_HEIGHT,
+            **kwargs
         )
-        self._secondary_panel = panel
 
     def _set_tertiary_panel(self, panel_cls, *args, **kwargs):
-        if isinstance(self._tertiary_panel, panel_cls):
-            return
-        self._verify_panel_class(panel_cls)
-        if self._tertiary_panel is not None:
-            self._tertiary_panel.grid_forget()
-        panel = self._get_cachable_panel(panel_cls, self._tertiary_panel_key(panel_cls), *args, **kwargs)
-        panel.grid(
-            column=self._PRIMARY_PANEL_WIDTH,
-            row=0,
-            columnspan=self._GRID_WIDTH - self._PRIMARY_PANEL_WIDTH,
-            rowspan=self._GRID_HEIGHT,
-            padx=self._PANEL_PAD_X,
-            pady=self._PANEL_PAD_Y,
-            sticky=tk.NSEW
+        self._init_panel(
+            panel_cls,
+            self._tertiary_panel_ref,
+            self._tertiary_panel_keygen,
+            *args,
+            x=self._PRIMARY_PANEL_WIDTH,
+            y=0,
+            w=self._GRID_WIDTH - self._PRIMARY_PANEL_WIDTH,
+            h=self._GRID_HEIGHT,
+            **kwargs
         )
-        self._tertiary_panel = panel
 
     def _get_cachable_panel(self, panel_cls, cache_key, *args, **kwargs):
         self._verify_panel_class(panel_cls)

@@ -9,7 +9,6 @@ from src.modules.todo.structs import Registrar
 
 
 class TaskPanel(Panel):
-    print(ioutils.get_cwd())
 
     _TITLE = "Tasks"
 

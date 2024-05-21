@@ -2,13 +2,14 @@
 import tkinter as tk
 
 from src.abstracts import Panel
-from utils import guiutils
+from utils import guiutils, ioutils
 
 from src.modules.todo.widgets import TaskWidget
 from src.modules.todo.structs import Registrar
 
 
 class TaskPanel(Panel):
+    print(ioutils.get_cwd())
 
     _TITLE = "Tasks"
 

@@ -1,6 +1,6 @@
 from importlib.machinery import SourceFileLoader
+import inspect
 import csv
-import sys
 import os
 
 
@@ -83,4 +83,5 @@ def value_if_mapped(d, key):
 
 
 def get_cwd():
-    return os.path.split(sys.argv[0])[0]
+    caller = inspect.stack()[1][1]
+    return os.path.split(os.path.abspath(caller))[0]

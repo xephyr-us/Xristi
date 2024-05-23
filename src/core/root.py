@@ -1,15 +1,18 @@
 
 import tkinter as tk
 
+from utils.pyutils import Reference, is_valid_subclass
 from ..event_handling import EventStream, Events
 from utils import ioutils, guiutils
-from utils.pyutils import Reference
 from .. import abstracts
 
 from . import panels
 
 
 class RootWindow:
+    """
+    The root window of the Xristi application.
+    """
 
     _EVENT_STREAM = EventStream()
 
@@ -164,7 +167,7 @@ class RootWindow:
         return panel
 
     def _verify_panel_class(self, panel_cls):
-        if not issubclass(panel_cls, abstracts.Panel):
+        if not is_valid_subclass(panel_cls, abstracts.Panel):
             msg = self._PANEL_SUBCLS_ERR_MSG.format(
                 panel_cls.__name__,
                 abstracts.Panel.__name__

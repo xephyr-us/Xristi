@@ -2,13 +2,16 @@
 import tkinter as tk
 
 from src.abstracts import Panel
-from utils import guiutils, ioutils
+from utils import guiutils
 
 from src.modules.todo.widgets import TaskWidget
 from src.modules.todo.structs import Registrar
 
 
 class TaskPanel(Panel):
+    """
+    The UI element enabling the user to access lists of tasks.
+    """
 
     _TITLE = "Tasks"
 
@@ -75,6 +78,9 @@ class TaskPanel(Panel):
 
 
 class TopicPanel(Panel):
+    """
+    The UI element enabling the user to create and select task topics.
+    """
 
     _TITLE = "Topics"
 

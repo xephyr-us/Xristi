@@ -8,6 +8,9 @@ from ..abstracts import Panel
 
 
 class BlankPanel(Panel):
+    """
+    Acts as a placeholder element for dynamically populated UI elements.
+    """
 
     _LABEL_COLOR = "#858383"
 
@@ -24,12 +27,15 @@ class BlankPanel(Panel):
 
 
 class ToolPanel(Panel):
+    """
+    Allows the user to access a dynamically generated list of tools.
+    """
 
     _EVENT_STREAM = EventStream()
 
-    _MANIFEST_FILENAME = "MANIFEST"
-
     _TITLE = "Tools"
+
+    _MANIFEST_FILENAME = "MANIFEST"
 
     # Pixels
     _ICON_SIZE = 35
@@ -50,17 +56,14 @@ class ToolPanel(Panel):
     def __init__(self, parent, modules_path):
         super().__init__(parent,)
         self._icons = set()  # Maintains references to icons such that they are not garbage collected
-        self._buttons = self._init_buttons(modules_path)
+        self._init_buttons(modules_path)
 
     def _init_buttons(self, modules_path):
-        buttons = []
         for subdir in ioutils.absolute_subdirectories(modules_path):
-            if ioutils.is_in_directory(self._MANIFEST_FILENAME, subdir):
+            if ioutils.directory_contains(subdir, self._MANIFEST_FILENAME):
                 manifest_path = os.path.join(subdir, self._MANIFEST_FILENAME)
                 button = self._build_button(manifest_path)
                 button.pack(fill=tk.X)
-                buttons.append(button)
-        return buttons
 
     def _build_button(self, manifest_path):
         manifest = ioutils.read_config(manifest_path)
@@ -104,7 +107,7 @@ class ToolPanel(Panel):
             self._ICON_SIZE,
             self._ICON_SIZE
         )
-        self._icons.add(icon)
+        self._icons.add(icon)  # Reference saved to avoid garbage collection
         return icon
 
     def _build_panel_update_function(self, event, panel_cls):

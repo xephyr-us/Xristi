@@ -5,12 +5,18 @@ from .abstracts import Singleton
 
 
 class Events(Enum):
+    """
+    An enum specifying the integer codes by which handled events are referenced.
+    """
     SET_PRIMARY_PANEL = 0
     SET_SECONDARY_PANEL = 1
     SET_TERTIARY_PANEL = 2
 
 
 class EventStream(Singleton):
+    """
+    A singleton which implements the pubsub messaging pattern for handled events.
+    """
 
     def __init__(self):
         self.__mappings = {}

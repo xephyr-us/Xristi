@@ -6,6 +6,9 @@ from utils.pyutils import ZERO_WIDTH_SPACE
 
 
 class Singleton(abc.ABC):
+    """
+    A mixin used to implement the singleton design pattern.
+    """
 
     _instance = None
 
@@ -16,6 +19,9 @@ class Singleton(abc.ABC):
 
 
 class WidgetWrapper(abc.ABC):
+    """
+    A mixin allowing an object to extend the interface of its wrapped widget.
+    """
 
     _INV_WIDGET_CLS_ERR_MSG = "Invalid widget class {} passed to {}"
     _ATTR_ERR_MSG = "No attribute {} found in class {}"
@@ -41,6 +47,9 @@ class WidgetWrapper(abc.ABC):
 
 
 class Panel(WidgetWrapper, metaclass=abc.ABCMeta):
+    """
+    An abstract class which wraps and titles a LabelFrame widget.
+    """
 
     _TITLE = ZERO_WIDTH_SPACE
     # A zero-width space is used as the default title such that the empty label pads the top of the

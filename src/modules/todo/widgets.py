@@ -8,6 +8,9 @@ from src.abstracts import WidgetWrapper
 
 
 class TaskWidget(WidgetWrapper):
+    """
+    Represents a task on the user's todo list as a UI element.
+    """
 
     _GRID_SIZE = 20
     _BUTTON_WIDTH = 1

@@ -11,6 +11,8 @@ class Events(Enum):
     SET_PRIMARY_PANEL = 0
     SET_SECONDARY_PANEL = 1
     SET_TERTIARY_PANEL = 2
+    NEW_TASK = 3
+    DEL_TASK = 4
 
 
 class EventStream(Singleton):
@@ -18,8 +20,7 @@ class EventStream(Singleton):
     A singleton which implements the pubsub messaging pattern for handled events.
     """
 
-    def __init__(self):
-        self.__mappings = {}
+    __mappings = {}
 
     def publish(self, event, *args, **kwargs):
         if event in Events and event in self.__mappings.keys():

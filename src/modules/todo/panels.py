@@ -1,6 +1,7 @@
 
 import tkinter as tk
 
+from src.event_handling import EventStream, Events
 from src.abstracts import Panel
 from utils import guiutils
 
@@ -12,6 +13,8 @@ class TaskPanel(Panel):
     """
     The UI element enabling the user to access lists of tasks.
     """
+
+    _EVENT_STEAM = EventStream()
 
     _TITLE = "Tasks"
 
@@ -31,9 +34,8 @@ class TaskPanel(Panel):
         )
         self._task_frame = self._init_task_frame()
         self._init_build_button()
-        self._tasks = Registrar(
-            "Test"
-        )
+        self._tasks = Registrar()
+        self._add_task("Testing")
         self._render_tasks()
 
     def _init_task_frame(self):
@@ -58,16 +60,16 @@ class TaskPanel(Panel):
         )
         return button
 
-    def _add_task(self, title):
-        self._tasks.register(title)
+    def _subscribe_to_events(self):
+        self._EVENT_STEAM.subscribe(Events.DEL_TASK, self._tasks.deregister)
 
-    def _remove_task(self, title):
-        self._tasks.deregister(title)
+    def _add_task(self, title):
+        widget = TaskWidget(self._task_frame, title, subtitle="Subtitle!")
+        self._tasks.register(widget)
 
     def _render_tasks(self):
         for task in self._tasks:
-            widget = TaskWidget(self._task_frame, task, subtitle="Subtitle!")
-            widget.pack(fill=tk.X, pady=2, padx=5)
+            task.pack(fill=tk.X, pady=2, padx=5)
 
 
 class TopicPanel(Panel):

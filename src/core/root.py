@@ -113,6 +113,11 @@ class RootWindow:
         panel.grid_propagate(0)
         panel_ref(panel)
 
+    def _get_mingeo(self):
+        return tuple(
+            int(x) for x in self._config[self._MIN_GEOMETRY_KEY].split("x")
+        )
+
     def _set_primary_panel(self, panel_cls, *args, **kwargs):
         self._init_panel(
             panel_cls,
@@ -124,11 +129,6 @@ class RootWindow:
             w=self._PRIMARY_PANEL_WIDTH,
             h=self._PRIMARY_PANEL_HEIGHT,
             **kwargs
-        )
-
-    def _get_mingeo(self):
-        return tuple(
-            int(x) for x in self._config[self._MIN_GEOMETRY_KEY].split("x")
         )
 
     def _set_secondary_panel(self, panel_cls, *args, **kwargs):

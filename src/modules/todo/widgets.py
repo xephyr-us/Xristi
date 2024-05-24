@@ -2,15 +2,17 @@
 import tkinter as tk
 
 from utils.pyutils import ZERO_WIDTH_SPACE, WHITESPACE
-from utils import guiutils
-
+from src.event_handling import EventStream, Events
 from src.abstracts import WidgetWrapper
+from utils import guiutils
 
 
 class TaskWidget(WidgetWrapper):
     """
     Represents a task on the user's todo list as a UI element.
     """
+
+    _EVENT_STREAM = EventStream()
 
     _GRID_SIZE = 20
     _BUTTON_WIDTH = 1
@@ -78,13 +80,14 @@ class TaskWidget(WidgetWrapper):
             w=self._BUTTON_WIDTH,
             image=guiutils.build_icon(self._CHECK_PNG_PATH)
         )
-        guiutils.init_grid_widget(  # Detele Button
+        guiutils.init_grid_widget(  # Delete Button
             tk.Button,
             self._frame,
             x=self._TITLE_WIDTH + 1,
             h=self._GRID_SIZE,
             w=self._BUTTON_WIDTH,
-            image=guiutils.build_icon(self._TRASH_PNG_PATH)
+            image=guiutils.build_icon(self._TRASH_PNG_PATH),
+            command=self._delete
         )
     
     def _normalize_text(self, text):
@@ -95,3 +98,6 @@ class TaskWidget(WidgetWrapper):
             return text[:self._LABEL_LENGTH]
         return text + WHITESPACE * (self._LABEL_LENGTH - length)
         
+    def _delete(self):
+        self._EVENT_STREAM.publish(Events.DEL_TASK, self)
+        self.forget()

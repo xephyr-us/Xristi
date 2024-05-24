@@ -95,7 +95,6 @@ def get_cwd(depth=0):
     """
     Returns the current working directory of the Python file inwhich it's called.
     """
-    print("\n", inspect.stack()[0])
     caller = inspect.stack()[1 + depth][1]
     return os.path.split(os.path.abspath(caller))[0]
 

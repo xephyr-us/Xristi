@@ -1,5 +1,5 @@
 name=To-do List
-icon=./todo.png
+icon=./assets/todo.png
 content=./panels.py
 second=TopicPanel
 third=TaskPanel

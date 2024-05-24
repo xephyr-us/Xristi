@@ -20,7 +20,7 @@ class TaskPanel(Panel):
 
     _BUILD_BUTTON_BG = "#1da334"
     _BUILD_BUTTON_FG = "#e3e3e3"
-    _BUILD_BUTTON_TEXT = "+New Task"
+    _BUILD_BUTTON_TEXT = "+ New Task"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -32,10 +32,7 @@ class TaskPanel(Panel):
         self._task_frame = self._init_task_frame()
         self._init_build_button()
         self._tasks = Registrar(
-            "Hello!",
-            "again",
-            ":)",
-            "my old friend <3"
+            "Test"
         )
         self._render_tasks()
 
@@ -58,12 +55,8 @@ class TaskPanel(Panel):
             bg=self._BUILD_BUTTON_BG,
             fg=self._BUILD_BUTTON_FG,
             text=self._BUILD_BUTTON_TEXT,
-            command=lambda: print("Hello!")
         )
         return button
-
-    def _build_dummy_tasks(self):
-        pass
 
     def _add_task(self, title):
         self._tasks.register(title)
@@ -73,7 +66,7 @@ class TaskPanel(Panel):
 
     def _render_tasks(self):
         for task in self._tasks:
-            widget = TaskWidget(self._task_frame, task, subtitle="Subtitle!", subtitle_color="blue")
+            widget = TaskWidget(self._task_frame, task, subtitle="Subtitle!")
             widget.pack(fill=tk.X, pady=2, padx=5)
 
 

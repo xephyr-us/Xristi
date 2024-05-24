@@ -3,6 +3,7 @@ import tkinter as tk
 import abc
 
 from utils.pyutils import ZERO_WIDTH_SPACE
+from utils import guiutils
 
 
 class Singleton(abc.ABC):

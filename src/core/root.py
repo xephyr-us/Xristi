@@ -18,7 +18,7 @@ class RootWindow:
 
     _GRID_WIDTH = 50
     _GRID_HEIGHT = 50
-    _PRIMARY_PANEL_WIDTH = 11   # Relative to _GRID_WIDTH
+    _PRIMARY_PANEL_WIDTH = 8   # Relative to _GRID_WIDTH
     _PRIMARY_PANEL_HEIGHT = 24  # Relative to _GRID_HEIGHT
 
     # Pixels
@@ -30,6 +30,7 @@ class RootWindow:
     _BLANK_PANEL_MSG = "Select a tool to begin"
 
     _MODULES_PATH_KEY = "modules"
+    _MIN_GEOMETRY_KEY = "mingeo"
     _GEOMETRY_KEY = "geo"
     _TITLE_KEY = "title"
     _ICON_KEY = "icon"
@@ -83,11 +84,8 @@ class RootWindow:
         root = tk.Tk()
         root.title(self._config[self._TITLE_KEY])
         root.geometry(self._config[self._GEOMETRY_KEY])
-        icon = guiutils.build_icon(
-            self._config[self._ICON_KEY],
-            self._ICON_SIZE,
-            self._ICON_SIZE
-        )
+        root.minsize(*self._get_mingeo())
+        icon = guiutils.build_icon(self._config[self._ICON_KEY])
         root.iconphoto(True, icon)
         guiutils.configure_grid(root, self._GRID_WIDTH, self._GRID_HEIGHT)
         return root
@@ -112,6 +110,7 @@ class RootWindow:
             pady=self._PANEL_PAD_Y,
             sticky=tk.NSEW
         )
+        panel.grid_propagate(0)
         panel_ref(panel)
 
     def _set_primary_panel(self, panel_cls, *args, **kwargs):
@@ -125,6 +124,11 @@ class RootWindow:
             w=self._PRIMARY_PANEL_WIDTH,
             h=self._PRIMARY_PANEL_HEIGHT,
             **kwargs
+        )
+
+    def _get_mingeo(self):
+        return tuple(
+            int(x) for x in self._config[self._MIN_GEOMETRY_KEY].split("x")
         )
 
     def _set_secondary_panel(self, panel_cls, *args, **kwargs):

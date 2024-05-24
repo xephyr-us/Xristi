@@ -1,4 +1,5 @@
 TITLE=Xristi
 GEO=1280x720
+MINGEO=512x288
 ICON=./assets/logo.png
 MODULES=./src/modules

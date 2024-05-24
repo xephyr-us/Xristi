@@ -1,7 +1,7 @@
 
 import tkinter as tk
 
-from utils.pyutils import ZERO_WIDTH_SPACE
+from utils.pyutils import ZERO_WIDTH_SPACE, WHITESPACE
 from utils import guiutils
 
 from src.abstracts import WidgetWrapper
@@ -17,15 +17,13 @@ class TaskWidget(WidgetWrapper):
     _TITLE_WIDTH = _GRID_SIZE - (2 * _BUTTON_WIDTH)
     _TITLE_HEIGHT = 15
 
-    _TITLE_FONT = ("Helvetica", 14, "bold")
-    _SUBTITLE_FONT = ("Helvetica", 11)
+    _TITLE_FONT = ("Consolas", 14, "bold")
+    _SUBTITLE_FONT = ("Consolas", 11)
+    _LABEL_LENGTH = 60  # Characters
+    _LABEL_FG = "#282829"
 
-    _DEFAULT_TITLE_COLOR = "#282829"
-    _DEFAULT_SUBTITLE_COLOR = "#282829"
-
-    @staticmethod
-    def _validate_text(text):
-        return text if text is not None and isinstance(text, str) else ZERO_WIDTH_SPACE
+    _TRASH_PNG_PATH = "./assets/trash.png"
+    _CHECK_PNG_PATH = "./assets/check.png"
 
     def __init__(self, parent, title, subtitle=None, title_color=None, subtitle_color=None):
         super().__init__(tk.LabelFrame, parent)
@@ -37,10 +35,10 @@ class TaskWidget(WidgetWrapper):
         )
         self._title = self._init_title(title, title_color)
         self._subtitle = self._init_subtitle(subtitle, subtitle_color)
-        self._buttons = self._init_buttons()
+        self._init_buttons()
 
     def _init_title(self, text, color):
-        text = self._validate_text(text)
+        normalized = self._normalize_text(text)
         label = guiutils.init_grid_widget(
             tk.Label,
             self._frame,
@@ -48,15 +46,15 @@ class TaskWidget(WidgetWrapper):
             y=0,
             w=self._TITLE_WIDTH,
             h=self._TITLE_HEIGHT,
-            text=text,
-            fg=color if color else self._DEFAULT_SUBTITLE_COLOR,
+            text=normalized,
+            fg=color if color else self._LABEL_FG,
             font=self._TITLE_FONT,
             sticky=tk.W
         )
         return label
 
     def _init_subtitle(self, text, color):
-        text = self._validate_text(text)
+        normalized = self._normalize_text(text)
         label = guiutils.init_grid_widget(
             tk.Label,
             self._frame,
@@ -64,31 +62,36 @@ class TaskWidget(WidgetWrapper):
             y=self._TITLE_HEIGHT,
             w=self._TITLE_WIDTH,
             h=self._GRID_SIZE - self._TITLE_HEIGHT,
-            text=text,
-            fg=color if color else self._DEFAULT_SUBTITLE_COLOR,
+            text=normalized,
+            fg=color if color else self._LABEL_FG,
             font=self._SUBTITLE_FONT,
             sticky=tk.W
         )
         return label
 
     def _init_buttons(self):
-        complete_button = guiutils.init_grid_widget(
+        guiutils.init_grid_widget(  # Complete Button
             tk.Button,
             self._frame,
             x=self._TITLE_WIDTH,
-            y=0,
             h=self._GRID_SIZE,
             w=self._BUTTON_WIDTH,
-            text="done",
+            image=guiutils.build_icon(self._CHECK_PNG_PATH)
         )
-        delete_button = guiutils.init_grid_widget(
+        guiutils.init_grid_widget(  # Detele Button
             tk.Button,
             self._frame,
             x=self._TITLE_WIDTH + 1,
-            y=0,
             h=self._GRID_SIZE,
             w=self._BUTTON_WIDTH,
-            text="trash",
-            sticky=tk.E + tk.N + tk.S
+            image=guiutils.build_icon(self._TRASH_PNG_PATH)
         )
-        return complete_button, delete_button
+    
+    def _normalize_text(self, text):
+        if text is None or not isinstance(text, str): 
+            return ZERO_WIDTH_SPACE
+        length = len(text)
+        if length >= self._LABEL_LENGTH:
+            return text[:self._LABEL_LENGTH]
+        return text + WHITESPACE * (self._LABEL_LENGTH - length)
+        

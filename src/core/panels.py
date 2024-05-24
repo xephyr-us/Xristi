@@ -37,9 +37,6 @@ class ToolPanel(Panel):
 
     _MANIFEST_FILENAME = "MANIFEST"
 
-    # Pixels
-    _ICON_SIZE = 35
-
     _NAME_KEY = "name"
     _ICON_KEY = "icon"
     _MODULE_KEY = "content"
@@ -55,7 +52,6 @@ class ToolPanel(Panel):
 
     def __init__(self, parent, modules_path):
         super().__init__(parent,)
-        self._icons = set()  # Maintains references to icons such that they are not garbage collected
         self._init_buttons(modules_path)
 
     def _init_buttons(self, modules_path):
@@ -73,11 +69,10 @@ class ToolPanel(Panel):
             secondary_cls,
             tertiary_cls
         )
-        icon = self._build_icon(manifest[self._ICON_KEY])
         return tk.Button(
             self._frame,
             text=manifest[self._NAME_KEY],
-            image=icon,
+            image=guiutils.build_icon(manifest[self._ICON_KEY]),
             compound=tk.LEFT,
             command=command
         )
@@ -100,15 +95,6 @@ class ToolPanel(Panel):
             secondary_update,
             tertiary_update
         )
-
-    def _build_icon(self, path):
-        icon = guiutils.build_icon(
-            path,
-            self._ICON_SIZE,
-            self._ICON_SIZE
-        )
-        self._icons.add(icon)  # Reference saved to avoid garbage collection
-        return icon
 
     def _build_panel_update_function(self, event, panel_cls):
         if pyutils.is_valid_subclass(panel_cls, Panel) and event in Events:

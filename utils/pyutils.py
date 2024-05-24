@@ -1,5 +1,6 @@
 
 ZERO_WIDTH_SPACE = "​"
+WHITESPACE = " "
 
 
 def package(func, *args, **kwargs):

@@ -1,5 +1,8 @@
 
+from tkinter import simpledialog as dialog
 import tkinter as tk
+
+from tkscrolledframe import ScrolledFrame
 
 from src.event_handling import EventStream, Events
 from src.abstracts import Panel
@@ -35,17 +38,17 @@ class TaskPanel(Panel):
         self._task_frame = self._init_task_frame()
         self._init_build_button()
         self._tasks = Registrar()
-        self._add_task("Testing")
-        self._render_tasks()
 
     def _init_task_frame(self):
-        frame = guiutils.init_grid_widget(
-            tk.Frame,
+        scrolled_frame = guiutils.init_grid_widget(
+            ScrolledFrame,
             self._frame,
+            scrollbars="vertical",
             w=self._GRID_SIZE,
             h=self._TASK_FRAME_HEIGHT
         )
-        return frame
+        scrolled_frame.bind_scroll_wheel
+        return scrolled_frame.display_widget(tk.Frame)
 
     def _init_build_button(self):
         button = guiutils.init_grid_widget(
@@ -57,15 +60,22 @@ class TaskPanel(Panel):
             bg=self._BUILD_BUTTON_BG,
             fg=self._BUILD_BUTTON_FG,
             text=self._BUILD_BUTTON_TEXT,
+            command=self._new_task
         )
         return button
 
     def _subscribe_to_events(self):
         self._EVENT_STEAM.subscribe(Events.DEL_TASK, self._tasks.deregister)
 
-    def _add_task(self, title):
+    def _new_task(self):
+        title = dialog.askstring(
+            "Input",
+            "Task name",
+            parent=self._frame
+        )
         widget = TaskWidget(self._task_frame, title, subtitle="Subtitle!")
         self._tasks.register(widget)
+        self._render_tasks()
 
     def _render_tasks(self):
         for task in self._tasks:

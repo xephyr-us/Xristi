@@ -78,7 +78,8 @@ class TaskWidget(WidgetWrapper):
             x=self._TITLE_WIDTH,
             h=self._GRID_SIZE,
             w=self._BUTTON_WIDTH,
-            image=guiutils.build_icon(self._CHECK_PNG_PATH)
+            image=guiutils.build_icon(self._CHECK_PNG_PATH),
+            command=self._delete
         )
         guiutils.init_grid_widget(  # Delete Button
             tk.Button,
@@ -100,4 +101,4 @@ class TaskWidget(WidgetWrapper):
         
     def _delete(self):
         self._EVENT_STREAM.publish(Events.DEL_TASK, self)
-        self.forget()
+        self.destroy()

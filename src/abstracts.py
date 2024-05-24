@@ -30,7 +30,7 @@ class WidgetWrapper(abc.ABC):
     def __init__(self, widget_cls, parent, *args, **kwargs):
         self._validate_widget_class(widget_cls)
         self._wrapped = widget_cls(parent, *args, **kwargs)
-        #self._forget_func = None
+        self._forget_func = None
 
     def __getattr__(self, item):
         try:
@@ -49,11 +49,11 @@ class WidgetWrapper(abc.ABC):
     
     def pack(self, *args, **kwargs):
         self._wrapped.pack(*args, **kwargs)
-        self._forget_func = self._wrapped.pack_forget
+        self._forget_func = self.pack_forget
 
     def grid(self, *args, **kwargs):
         self._wrapped.grid(*args, **kwargs)
-        self._forget_func = self._wrapped.grid_forget
+        self._forget_func = self.grid_forget
 
     def pack_forget(self, *args, **kwargs):
         self._wrapped.pack_forget(*args, **kwargs)

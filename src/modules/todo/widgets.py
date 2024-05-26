@@ -27,6 +27,9 @@ class TaskWidget(WidgetWrapper):
     _TRASH_PNG_PATH = "./assets/trash.png"
     _CHECK_PNG_PATH = "./assets/check.png"
 
+    def __str__(self):
+        return self.content
+
     def __init__(self, parent, title, subtitle=None, title_color=None, subtitle_color=None):
         super().__init__(tk.LabelFrame, parent)
         self._frame = self._wrapped
@@ -35,6 +38,7 @@ class TaskWidget(WidgetWrapper):
             self._GRID_SIZE,
             self._GRID_SIZE
         )
+        self.content = title
         self._title = self._init_title(title, title_color)
         self._subtitle = self._init_subtitle(subtitle, subtitle_color)
         self._init_buttons()

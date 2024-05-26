@@ -28,7 +28,7 @@ def configure_grid(widget, width, height):
         raise TypeError(msg)
 
 
-def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, sticky=tk.NSEW, **kwargs):
+def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady=0, sticky=tk.NSEW, propagate=False, **kwargs):
     """
     Creates a widget_cls object and grids it to its parent at the given coordinates.
     """
@@ -43,7 +43,7 @@ def init_grid_widget(widget_cls, parent, *args, x=0, y=0, w=0, h=0, padx=0, pady
             padx=padx,
             pady=pady
         )
-        widget.grid_propagate(0)
+        widget.grid_propagate(1 if propagate else 0)
         return widget
 
     except TypeError:

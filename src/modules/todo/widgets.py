@@ -154,13 +154,22 @@ class ScrollableFrame(WidgetWrapper):
         self._canvas.create_window(
             (4, 4), 
             window=self._inner_frame, 
-            anchor="nw"
+            anchor="nw",
         )
 
-        def on_frame_config(canvas):
-            canvas.configure(scrollregion=canvas.bbox("all"))
+        def on_frame_config():
+            self._canvas.configure(scrollregion=self._canvas.bbox("all"))
 
-        self._inner_frame.bind("<Configure>", lambda _, canvas=self._canvas: on_frame_config(canvas))
+        def on_canvas_config():
+            self._canvas.create_window(
+                (4, 4), 
+                window=self._inner_frame, 
+                anchor="nw",
+                width=self._canvas.winfo_width()
+            )
+
+        self._inner_frame.bind("<Configure>", lambda _: on_frame_config())
+        self._canvas.bind("<Configure>", lambda _: on_canvas_config())
 
     @property
     def frame(self):

@@ -175,3 +175,7 @@ class ScrollableFrame(WidgetWrapper):
     @property
     def frame(self):
         return self._inner_frame
+    
+
+class ComboBoxDialog:
+    pass

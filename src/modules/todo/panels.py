@@ -112,6 +112,14 @@ class TopicPanel(Panel):
     _TEXT_DIALOG_TITLE = "Text"
     _TEXT_DIALOG_PROMPT = "Topic name"
 
+    @staticmethod
+    def _calc_fg(bg):
+        brightness = 0
+        for i in range(1, 7, 2):
+            brightness += int(bg[i:i+2], base=16)
+        rel_avg_brightness = (brightness / 3) / 255
+        return "white" if rel_avg_brightness < 0.5 else "black"
+
     def __init__(self, parent):
         super().__init__(parent)
         guiutils.configure_grid(
@@ -180,7 +188,7 @@ class TopicPanel(Panel):
             self._scrollable.frame,
             text=topic,
             bg=color,
-            fg="white",
+            fg=self._calc_fg(color),
         )
         button.bind("<Button-1>", lambda _, topic=topic: self._render_topic_tasks(topic))
         button.bind("<Button-3>", lambda _, topic=topic: self._remove_topic(topic))

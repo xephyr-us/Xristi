@@ -27,6 +27,9 @@ class TaskPanel(Panel):
     _BUTTON_FG = "#e3e3e3"
     _BUTTON_TEXT = "+ New Task"
 
+    _TEXT_DIALOG_TITLE = "Text"
+    _TEXT_DIALOG_PROMPT = "Task name"
+
     def __init__(self, parent):
         super().__init__(parent)
         guiutils.configure_grid(
@@ -35,6 +38,7 @@ class TaskPanel(Panel):
             self._GRID_SIZE
         )
         self._tasks = Registrar()
+        self._topics = {}
         self._scrollable = self._init_scrollable_frame()
         self._init_button()
         self._subscribe_to_events()
@@ -65,11 +69,15 @@ class TaskPanel(Panel):
 
     def _subscribe_to_events(self):
         self._EVENT_STEAM.subscribe(Events.DEL_TASK, self._tasks.deregister)
+        self._EVENT_STEAM.subscribe(Events.SET_TASK_TOPICS, self._set_topics)
+
+    def _set_topics(self, new_topics):
+        self._topics = new_topics
 
     def _new_task(self):
         title = dialog.askstring(
-            "Input",
-            "Task name",
+            self._TEXT_DIALOG_TITLE,
+            self._TEXT_DIALOG_PROMPT,
             parent=self._frame
         )
         widget = widgets.TaskWidget(
@@ -90,6 +98,8 @@ class TopicPanel(Panel):
     The UI element enabling the user to create and select task topics.
     """
 
+    _EVENT_STREAM = EventStream()
+
     _TITLE = "Topics"
 
     _GRID_SIZE = 50
@@ -98,6 +108,9 @@ class TopicPanel(Panel):
     _BUTTON_BG = "#1da334"
     _BUTTON_FG = "#e3e3e3"
     _BUTTON_TEXT = "+ New Topic"
+
+    _TEXT_DIALOG_TITLE = "Text"
+    _TEXT_DIALOG_PROMPT = "Topic name"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -109,6 +122,7 @@ class TopicPanel(Panel):
         self._scrollable = self._init_scrollable_panel()
         self._button = self._init_button()
         self._topic_buttons = {}
+        self._topics = {}
 
     def _init_scrollable_panel(self):
         scrollable = guiutils.init_grid_widget(
@@ -135,29 +149,31 @@ class TopicPanel(Panel):
 
     def _add_topic(self):
         topic = dialog.askstring(
-            "Input",
-            "Topic name",
+            self._TEXT_DIALOG_TITLE,
+            self._TEXT_DIALOG_PROMPT,
             parent=self._frame
         )
         color = colorchooser.askcolor(
             parent=self._frame
         )[1]
+        self._topics[topic] = color
+        self._EVENT_STREAM.publish(
+            Events.SET_TASK_TOPICS, 
+            self._topics.copy()
+        )
         button = self._build_topic_button(topic, color)
         self._topic_buttons[topic] = button
-        self._render_topics()
+        self._render_topic_buttons()
 
     def _remove_topic(self, topic):
+        del self._topics[topic]
         button = self._topic_buttons[topic]
         button.destroy()
         del self._topic_buttons[topic]
-
-    def _render_topics(self):
-        for button in self._topic_buttons.values():
-            print
-            button.pack(fill=tk.X)
-
-    def _render_topic_tasks(self, topic):
-        print(topic)
+        self._EVENT_STREAM.publish(
+            Events.SET_TASK_TOPICS, 
+            self._topics.copy()
+        )
 
     def _build_topic_button(self, topic, color):
         button = tk.Button(
@@ -166,13 +182,13 @@ class TopicPanel(Panel):
             bg=color,
             fg="white",
         )
-        
-        def render(*_):
-            self._render_topic_tasks(topic)
-
-        def remove(*_):
-            self._remove_topic(topic)
-
         button.bind("<Button-1>", lambda _, topic=topic: self._render_topic_tasks(topic))
         button.bind("<Button-3>", lambda _, topic=topic: self._remove_topic(topic))
         return button
+
+    def _render_topic_buttons(self):
+        for button in self._topic_buttons.values():
+            button.pack(fill=tk.X)
+
+    def _render_topic_tasks(self, topic):
+        print(topic)

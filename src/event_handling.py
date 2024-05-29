@@ -13,6 +13,7 @@ class Events(Enum):
     SET_TERTIARY_PANEL = 2
     NEW_TASK = 3
     DEL_TASK = 4
+    SET_TASK_TOPICS = 5
 
 
 class EventStream(Singleton):

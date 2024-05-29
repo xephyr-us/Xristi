@@ -15,6 +15,8 @@ class TaskWidget(WidgetWrapper):
     _EVENT_STREAM = EventStream()
 
     _GRID_SIZE = 20
+
+    # Relative to _GRID_SIZE
     _BUTTON_WIDTH = 1
     _TITLE_WIDTH = _GRID_SIZE - (2 * _BUTTON_WIDTH)
     _TITLE_HEIGHT = 15
@@ -27,9 +29,6 @@ class TaskWidget(WidgetWrapper):
     _TRASH_PNG_PATH = "./assets/trash.png"
     _CHECK_PNG_PATH = "./assets/check.png"
 
-    def __str__(self):
-        return self.content
-
     def __init__(self, parent, title, subtitle=None, title_color=None, subtitle_color=None):
         super().__init__(tk.LabelFrame, parent)
         self._frame = self._wrapped
@@ -38,7 +37,6 @@ class TaskWidget(WidgetWrapper):
             self._GRID_SIZE,
             self._GRID_SIZE
         )
-        self.content = title
         self._title = self._init_title(title, title_color)
         self._subtitle = self._init_subtitle(subtitle, subtitle_color)
         self._init_buttons()
@@ -76,7 +74,8 @@ class TaskWidget(WidgetWrapper):
         return label
 
     def _init_buttons(self):
-        guiutils.init_grid_widget(  # Complete Button
+        # Button to mark tasks complete
+        guiutils.init_grid_widget(
             tk.Button,
             self._frame,
             x=self._TITLE_WIDTH,
@@ -85,7 +84,9 @@ class TaskWidget(WidgetWrapper):
             image=guiutils.build_icon(self._CHECK_PNG_PATH),
             command=self._delete
         )
-        guiutils.init_grid_widget(  # Delete Button
+
+        # Button to delete tasks
+        guiutils.init_grid_widget( 
             tk.Button,
             self._frame,
             x=self._TITLE_WIDTH + 1,

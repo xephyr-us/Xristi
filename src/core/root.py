@@ -18,13 +18,27 @@ class RootWindow:
 
     _GRID_WIDTH = 50
     _GRID_HEIGHT = 50
-    _PRIMARY_PANEL_WIDTH = 8   # Relative to _GRID_WIDTH
-    _PRIMARY_PANEL_HEIGHT = 24  # Relative to _GRID_HEIGHT
+
+    # Relative to _GRID_WIDTH and _GRID_HEIGHT
+    _PRIMARY_PANEL_WIDTH = 8
+    _PRIMARY_PANEL_HEIGHT = 24
+    _SECONDARY_PANEL_WIDTH = _PRIMARY_PANEL_WIDTH
+    _SECONDARY_PANEL_HEIGHT = _GRID_HEIGHT - _PRIMARY_PANEL_HEIGHT
+    _TERTIARY_PANEL_WIDTH = _GRID_WIDTH - _PRIMARY_PANEL_WIDTH
+    _TERTIARY_PANEL_HEIGHT = _GRID_HEIGHT
 
     # Pixels
     _PANEL_PAD_X = 3
     _PANEL_PAD_Y = 3
     _ICON_SIZE = 50
+    
+    # Pixels, initialized at 0
+    _PRIMARY_PANEL_WIDTH_PX = 0
+    _PRIMARY_PANEL_HEIGHT_PX = 0
+    _SECONDARY_PANEL_WIDTH_PX = 0
+    _SECONDARY_PANEL_HEIGHT_PX = 0
+    _TERTIARY_PANEL_WIDTH_PX = 0
+    _TERTIARY_PANEL_HEIGHT_PX = 0
 
     _PANEL_SUBCLS_ERR_MSG = "Class {} is not a subclass of {}"
     _BLANK_PANEL_MSG = "Select a tool to begin"
@@ -63,34 +77,24 @@ class RootWindow:
         self._relaunch = False
         self._config = ioutils.read_config(self._config_path)
         self._root = self._init_root()
+        self._calc_primary_panel_px_size()
+        self._calc_secondary_panel_px_size()
+        self._calc_tertiary_panel_px_size()
         self._EVENT_STREAM.publish(Events.SET_PRIMARY_PANEL, panels.ToolPanel, self._config[self._MODULES_PATH_KEY])
         self._EVENT_STREAM.publish(Events.SET_SECONDARY_PANEL, panels.BlankPanel)
         self._EVENT_STREAM.publish(Events.SET_TERTIARY_PANEL, panels.BlankPanel, self._BLANK_PANEL_MSG)
-
-    def _subscribe_to_events(self):
-        self._EVENT_STREAM.subscribe(Events.SET_PRIMARY_PANEL, self._set_primary_panel)
-        self._EVENT_STREAM.subscribe(Events.SET_SECONDARY_PANEL, self._set_secondary_panel)
-        self._EVENT_STREAM.subscribe(Events.SET_TERTIARY_PANEL, self._set_tertiary_panel)
-
-    def _clear_cached_values(self):
-        self._config.clear()
-        self._cache.clear()
-        self._root = None
-        self._primary_panel_ref(None)
-        self._secondary_panel_ref(None)
-        self._tertiary_panel_ref(None)
 
     def _init_root(self):
         root = tk.Tk()
         root.title(self._config[self._TITLE_KEY])
         root.geometry(self._config[self._GEOMETRY_KEY])
-        root.minsize(*self._get_mingeo())
+        #root.minsize(*self._get_mingeo())
         icon = guiutils.build_icon(self._config[self._ICON_KEY])
         root.iconphoto(True, icon)
         guiutils.configure_grid(root, self._GRID_WIDTH, self._GRID_HEIGHT)
         return root
 
-    def _init_panel(self, panel_cls, panel_ref, keygen, *args, x=0, y=0, w=0, h=0, **kwargs):
+    def _init_panel(self, panel_cls, panel_ref, keygen, *args, x=0, y=0, w=0, h=0, sticky="NSEW", **kwargs):
         if not isinstance(panel_ref, Reference) or isinstance(panel_ref(), panel_cls):
             return
         if panel_ref() is not None:
@@ -108,10 +112,55 @@ class RootWindow:
             rowspan=h,
             padx=self._PANEL_PAD_X,
             pady=self._PANEL_PAD_Y,
-            sticky=tk.NSEW
+            sticky=sticky
         )
         panel.grid_propagate(0)
         panel_ref(panel)
+
+    def _subscribe_to_events(self):
+        self._EVENT_STREAM.subscribe(Events.SET_PRIMARY_PANEL, self._set_primary_panel)
+        self._EVENT_STREAM.subscribe(Events.SET_SECONDARY_PANEL, self._set_secondary_panel)
+        self._EVENT_STREAM.subscribe(Events.SET_TERTIARY_PANEL, self._set_tertiary_panel)
+
+    def _clear_cached_values(self):
+        self._config.clear()
+        self._cache.clear()
+        self._root = None
+        self._primary_panel_ref(None)
+        self._secondary_panel_ref(None)
+        self._tertiary_panel_ref(None)
+
+    def _calc_primary_panel_px_size(self):
+        min_w, min_h = self._get_mingeo()
+        self._PRIMARY_PANEL_WIDTH_PX = round(
+            self._PRIMARY_PANEL_WIDTH / self._GRID_WIDTH * min_w
+        )
+        self._PRIMARY_PANEL_HEIGHT_PX = round(
+            self._PRIMARY_PANEL_HEIGHT / self._GRID_HEIGHT * min_h
+        )
+
+    def _calc_secondary_panel_px_size(self):
+        min_w, min_h = self._get_mingeo()
+        self._SECONDARY_PANEL_WIDTH_PX = round(
+            self._SECONDARY_PANEL_WIDTH / self._GRID_WIDTH * min_w
+        )
+        self._SECONDARY_PANEL_HEIGHT_PX = round(
+            self._SECONDARY_PANEL_HEIGHT / self._GRID_HEIGHT * min_h
+        )
+
+    def _calc_tertiary_panel_px_size(self):
+        min_w, min_h = self._get_mingeo()
+        self._TERTIARY_PANEL_WIDTH_PX = round(
+            self._TERTIARY_PANEL_WIDTH / self._GRID_WIDTH * min_w
+        )
+        self._TERTIARY_PANEL_HEIGHT_PX = round(
+            self._TERTIARY_PANEL_HEIGHT / self._GRID_HEIGHT * min_h
+        )
+
+    def _get_geo(self):
+        return tuple(
+            int(x) for x in self._config[self._GEOMETRY_KEY].split("x")
+        )
 
     def _get_mingeo(self):
         return tuple(
@@ -140,7 +189,7 @@ class RootWindow:
             x=0,
             y=self._PRIMARY_PANEL_HEIGHT,
             w=self._PRIMARY_PANEL_WIDTH,
-            h=self._GRID_HEIGHT - self._PRIMARY_PANEL_HEIGHT,
+            h=self._SECONDARY_PANEL_HEIGHT,
             **kwargs
         )
 

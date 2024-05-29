@@ -6,8 +6,8 @@ from src.event_handling import EventStream, Events
 from src.abstracts import Panel
 from utils import guiutils
 
-from src.modules.todo.widgets import TaskWidget
 from src.modules.todo.structs import Registrar
+from src.modules.todo import widgets
 
 
 class TaskPanel(Panel):
@@ -20,8 +20,7 @@ class TaskPanel(Panel):
     _TITLE = "Tasks"
 
     _GRID_SIZE = 75
-    _TASK_CANVAS_HEIGHT = 70  # Relative to _GRID_SIZE
-    _SCROLLBAR_WIDTH = 1  # Relative to _GRID_SIZE
+    _SCOLLABLE_HEIGHT = 70  # Relative to _GRID_SIZE
 
     _BUILD_BUTTON_BG = "#1da334"
     _BUILD_BUTTON_FG = "#e3e3e3"
@@ -35,68 +34,33 @@ class TaskPanel(Panel):
             self._GRID_SIZE
         )
         self._tasks = Registrar()
-        self._task_canvas = self._init_task_canvas()
-        self._task_frame = self._init_task_frame()
-        self._scrollbar = self._init_scrollbar()
+        self._scrollable = self._init_scrollable_frame()
         self._init_build_button()
-        self._config_scrolling()
         self._subscribe_to_events()
 
-    def _init_task_canvas(self):
-        canvas = guiutils.init_grid_widget(
-            tk.Canvas,
+    def _init_scrollable_frame(self):
+        scrollable = guiutils.init_grid_widget(
+            widgets.ScrollableFrame,
             self._frame,
-            borderwidth=0,
-            w=self._GRID_SIZE - self._SCROLLBAR_WIDTH,
-            h=self._TASK_CANVAS_HEIGHT,
+            w=self._GRID_SIZE,
+            h=self._SCOLLABLE_HEIGHT,
             propagate=True
         )
-        return canvas
-
-    def _init_task_frame(self):
-        frame = tk.Frame(
-            self._task_canvas, 
-            )
-        return frame
-    
-    def _init_scrollbar(self):
-        scrollbar = guiutils.init_grid_widget(
-            tk.Scrollbar,
-            self._frame,
-            orient=tk.VERTICAL,
-            command=self._task_canvas.yview,
-            x=self._GRID_SIZE - self._SCROLLBAR_WIDTH,
-            w=self._SCROLLBAR_WIDTH,
-            h=self._TASK_CANVAS_HEIGHT
-        )
-        return scrollbar
+        return scrollable
 
     def _init_build_button(self):
         button = guiutils.init_grid_widget(
             tk.Button,
             self._frame,
-            y=self._TASK_CANVAS_HEIGHT,
+            y=self._SCOLLABLE_HEIGHT,
             w=self._GRID_SIZE,
-            h=self._GRID_SIZE - self._TASK_CANVAS_HEIGHT,
+            h=self._GRID_SIZE - self._SCOLLABLE_HEIGHT,
             bg=self._BUILD_BUTTON_BG,
             fg=self._BUILD_BUTTON_FG,
             text=self._BUILD_BUTTON_TEXT,
             command=self._new_task
         )
         return button
-    
-    def _config_scrolling(self):
-        self._task_canvas.config(yscrollcommand=self._scrollbar.set)
-        self._task_canvas.create_window(
-            (4, 4), 
-            window=self._task_frame, 
-            anchor="nw"
-        )
-
-        def on_frame_config(canvas):
-            canvas.configure(scrollregion=canvas.bbox("all"))
-
-        self._task_frame.bind("<Configure>", lambda _, canvas=self._task_canvas: on_frame_config(canvas))
 
     def _subscribe_to_events(self):
         self._EVENT_STEAM.subscribe(Events.DEL_TASK, self._tasks.deregister)
@@ -107,7 +71,11 @@ class TaskPanel(Panel):
             "Task name",
             parent=self._frame
         )
-        widget = TaskWidget(self._task_frame, title, subtitle="Subtitle!")
+        widget = widgets.TaskWidget(
+            self._scrollable.frame, 
+            title, 
+            subtitle="Subtitle!"
+        )
         self._tasks.register(widget)
         self._render_tasks()
 

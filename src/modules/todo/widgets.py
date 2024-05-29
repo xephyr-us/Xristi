@@ -106,3 +106,62 @@ class TaskWidget(WidgetWrapper):
     def _delete(self):
         self._EVENT_STREAM.publish(Events.DEL_TASK, self)
         self.destroy()
+
+
+class ScrollableFrame(WidgetWrapper):
+
+    _GRID_SIZE = 50
+    _SCROLLBAR_WIDTH = 1
+
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(tk.Frame, parent, *args, **kwargs)
+        self._outer_frame = self._wrapped
+        guiutils.configure_grid(
+            self._outer_frame,
+            self._GRID_SIZE,
+            self._GRID_SIZE
+        )
+        self._canvas = self._init_canvas()
+        self._inner_frame = tk.Frame(self._canvas)
+        self._scrollbar = self._init_scrollbar()
+        self._config_scrolling()
+
+    def _init_canvas(self):
+        canvas = guiutils.init_grid_widget(
+            tk.Canvas,
+            self._outer_frame,
+            borderwidth=0,
+            w=self._GRID_SIZE - self._SCROLLBAR_WIDTH,
+            h=self._GRID_SIZE,
+            propagate=True
+        )
+        return canvas
+    
+    def _init_scrollbar(self):
+        scrollbar = guiutils.init_grid_widget(
+            tk.Scrollbar,
+            self._outer_frame,
+            orient=tk.VERTICAL,
+            command=self._canvas.yview,
+            x=self._GRID_SIZE - self._SCROLLBAR_WIDTH,
+            w=self._SCROLLBAR_WIDTH,
+            h=self._GRID_SIZE
+        )
+        return scrollbar
+    
+    def _config_scrolling(self):
+        self._canvas.config(yscrollcommand=self._scrollbar.set)
+        self._canvas.create_window(
+            (4, 4), 
+            window=self._inner_frame, 
+            anchor="nw"
+        )
+
+        def on_frame_config(canvas):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        self._inner_frame.bind("<Configure>", lambda _, canvas=self._canvas: on_frame_config(canvas))
+
+    @property
+    def frame(self):
+        return self._inner_frame

@@ -22,7 +22,7 @@ class TaskWidget(WidgetWrapper):
     _TITLE_HEIGHT = 15
 
     _TITLE_FONT = ("Consolas", 14, "bold")
-    _SUBTITLE_FONT = ("Consolas", 11)
+    _SUBTITLE_FONT = ("Consolas", 11, "bold")
     _LABEL_LENGTH = 60  # Characters
     _LABEL_FG = "#282829"
 
@@ -39,7 +39,8 @@ class TaskWidget(WidgetWrapper):
         )
         self._title = self._init_title(title, title_color)
         self._subtitle = self._init_subtitle(subtitle, subtitle_color)
-        self._init_buttons()
+        self._delete_button = self._init_delete_button()
+        self._complete_button = self._init_complete_button()
 
     def _init_title(self, text, color):
         normalized = self._normalize_text(text)
@@ -72,21 +73,9 @@ class TaskWidget(WidgetWrapper):
             sticky=tk.W
         )
         return label
-
-    def _init_buttons(self):
-        # Button to mark tasks complete
-        guiutils.init_grid_widget(
-            tk.Button,
-            self._frame,
-            x=self._TITLE_WIDTH,
-            h=self._GRID_SIZE,
-            w=self._BUTTON_WIDTH,
-            image=guiutils.build_icon(self._CHECK_PNG_PATH),
-            command=self._delete
-        )
-
-        # Button to delete tasks
-        guiutils.init_grid_widget( 
+    
+    def _init_delete_button(self):
+        return guiutils.init_grid_widget( 
             tk.Button,
             self._frame,
             x=self._TITLE_WIDTH + 1,
@@ -94,6 +83,17 @@ class TaskWidget(WidgetWrapper):
             w=self._BUTTON_WIDTH,
             image=guiutils.build_icon(self._TRASH_PNG_PATH),
             command=self._delete
+        )
+
+    def _init_complete_button(self):
+        return guiutils.init_grid_widget(
+            tk.Button,
+            self._frame,
+            x=self._TITLE_WIDTH,
+            h=self._GRID_SIZE,
+            w=self._BUTTON_WIDTH,
+            image=guiutils.build_icon(self._CHECK_PNG_PATH),
+            command=self._complete
         )
     
     def _normalize_text(self, text):
@@ -107,6 +107,11 @@ class TaskWidget(WidgetWrapper):
     def _delete(self):
         self._EVENT_STREAM.publish(Events.DEL_TASK, self)
         self.destroy()
+        del self
+
+    def _complete(self):
+        self._EVENT_STREAM.publish(Events.COMPLETE_TASK, self)
+        self._complete_button.grid_forget()
 
 
 class ScrollableFrame(WidgetWrapper):
@@ -176,6 +181,3 @@ class ScrollableFrame(WidgetWrapper):
     def frame(self):
         return self._inner_frame
     
-
-class ComboBoxDialog:
-    pass

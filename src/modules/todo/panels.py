@@ -1,5 +1,6 @@
 
 from tkinter import simpledialog as dialog
+from tkinter import messagebox as message
 from tkinter import colorchooser
 import tkinter as tk
 
@@ -27,8 +28,13 @@ class TaskPanel(Panel):
     _BUTTON_FG = "#e3e3e3"
     _BUTTON_TEXT = "+ New Task"
 
-    _TEXT_DIALOG_TITLE = "Text"
-    _TEXT_DIALOG_PROMPT = "Task name"
+    _NAME_DIALOG_TITLE = "Name"
+    _NAME_DIALOG_PROMPT = "What's this task's name?"
+
+    _TOPIC_DIALOG_TITLE = "Topic (Optional)"
+    _TOPIC_DIALOG_PROMPT = "What topic does this task fall under?"
+
+    _INV_TOPIC_DIALOG_PROMPT = f"No such topic! {_TOPIC_DIALOG_PROMPT}"
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -37,8 +43,9 @@ class TaskPanel(Panel):
             self._GRID_SIZE,
             self._GRID_SIZE
         )
-        self._tasks = Registrar()
-        self._topics = {}
+        self._incomplete_tasks = Registrar()
+        self._complete_tasks = []
+        self._topic_colors = {}
         self._scrollable = self._init_scrollable_frame()
         self._init_button()
         self._subscribe_to_events()
@@ -54,7 +61,8 @@ class TaskPanel(Panel):
         return scrollable
 
     def _init_button(self):
-        button = guiutils.init_grid_widget(
+        # New task button
+        guiutils.init_grid_widget(
             tk.Button,
             self._frame,
             y=self._SCOLLABLE_HEIGHT,
@@ -65,32 +73,85 @@ class TaskPanel(Panel):
             text=self._BUTTON_TEXT,
             command=self._new_task
         )
-        return button
 
     def _subscribe_to_events(self):
-        self._EVENT_STEAM.subscribe(Events.DEL_TASK, self._tasks.deregister)
+        self._EVENT_STEAM.subscribe(Events.DEL_TASK, self._delete_task)
+        self._EVENT_STEAM.subscribe(Events.COMPLETE_TASK, self._complete_task)
         self._EVENT_STEAM.subscribe(Events.SET_TASK_TOPICS, self._set_topics)
+        self._EVENT_STEAM.subscribe(Events.SELECT_TASK_TOPIC, self._render_incomplete_tasks)
+        self._EVENT_STEAM.subscribe(Events.SELECT_TASKS_COMPLETED, self._render_complete_tasks)
 
     def _set_topics(self, new_topics):
-        self._topics = new_topics
+        self._topic_colors = new_topics
 
     def _new_task(self):
-        title = dialog.askstring(
-            self._TEXT_DIALOG_TITLE,
-            self._TEXT_DIALOG_PROMPT,
-            parent=self._frame
-        )
+        name = self._prompt_task_name()
+        topic = self._prompt_task_topic()
+        topic_color = self._get_topic_color(topic)
         widget = widgets.TaskWidget(
             self._scrollable.frame, 
-            title, 
-            subtitle="Subtitle!"
+            name, 
+            subtitle=topic,
+            subtitle_color=topic_color
         )
-        self._tasks.register(widget)
-        self._render_tasks()
+        if topic is None:
+            self._incomplete_tasks.register(widget)
+        else:
+            self._incomplete_tasks.register(widget, topic)
+        self._render_incomplete_tasks()
 
-    def _render_tasks(self):
-        for task in self._tasks:
+    def _delete_task(self, task):
+        self._incomplete_tasks.deregister(task)
+        if task in self._complete_tasks:
+            self._complete_tasks.remove(task)
+
+    def _complete_task(self, task):
+        self._incomplete_tasks.deregister(task)
+        self._complete_tasks.append(task)
+        self._render_incomplete_tasks()
+
+    def _render_incomplete_tasks(self, topic=None):
+        self._clear_rendered_tasks()
+        tasks = self._incomplete_tasks if topic is None else self._incomplete_tasks.collect(topic)
+        for task in tasks:
             task.pack(fill=tk.X, pady=2, padx=5)
+
+    def _render_complete_tasks(self):
+        self._clear_rendered_tasks()
+        for task in self._complete_tasks:
+            task.pack(fill=tk.X, pady=2, padx=5)
+
+    def _clear_rendered_tasks(self):
+        for child in self._scrollable.frame.winfo_children():
+            child.pack_forget()
+
+    def _prompt_task_name(self):
+        return dialog.askstring(
+            self._NAME_DIALOG_TITLE,
+            self._NAME_DIALOG_PROMPT,
+            parent=self._frame
+        )
+
+    def _prompt_task_topic(self):
+        topic = dialog.askstring(
+            self._TOPIC_DIALOG_TITLE,
+            self._TOPIC_DIALOG_PROMPT,
+            parent=self._frame
+        )
+        if topic == "":
+            return None
+        while topic not in self._topic_colors.keys():
+            topic = dialog.askstring(
+                self._TOPIC_DIALOG_TITLE,
+                self._INV_TOPIC_DIALOG_PROMPT,
+                parent=self._frame
+            )
+        return topic
+    
+    def _get_topic_color(self, topic):
+        if topic is None or topic not in self._topic_colors.keys():
+            return None
+        return self._topic_colors[topic]
 
 
 class TopicPanel(Panel):
@@ -102,12 +163,23 @@ class TopicPanel(Panel):
 
     _TITLE = "Topics"
 
-    _GRID_SIZE = 50
-    _SCROLLABLE_HEIGHT = 49
+    _GRID_SIZE = 60
 
-    _BUTTON_BG = "#1da334"
-    _BUTTON_FG = "#e3e3e3"
-    _BUTTON_TEXT = "+ New Topic"
+    # Relative to _GRID_SIZE
+    _SCROLLABLE_HEIGHT = 58
+    _BUTTON_WIDTH = 20
+
+    _NEW_BUTTON_BG = "#1da334"
+    _NEW_BUTTON_FG = "#e3e3e3"
+    _NEW_BUTTON_TEXT = "+ New Topic"
+
+    _ALL_BUTTON_BG = "#173f80"
+    _ALL_BUTTON_FG = "#e3e3e3"
+    _ALL_BUTTON_TEXT = "All Tasks"
+
+    _COMPLETED_BUTTON_BG = "#801717"
+    _COMPLETED_BUTTON_FG = "#e3e3e3"
+    _COMPLETED_BUTTON_TEXT = "Finished"
 
     _TEXT_DIALOG_TITLE = "Text"
     _TEXT_DIALOG_PROMPT = "Topic name"
@@ -128,7 +200,7 @@ class TopicPanel(Panel):
             self._GRID_SIZE
         )
         self._scrollable = self._init_scrollable_panel()
-        self._button = self._init_button()
+        self._init_buttons()
         self._topic_buttons = {}
         self._topics = {}
 
@@ -141,19 +213,47 @@ class TopicPanel(Panel):
         )
         return scrollable
 
-    def _init_button(self):
-        button = guiutils.init_grid_widget(
+    def _init_buttons(self):
+        # New topic button
+        guiutils.init_grid_widget(
             tk.Button,
             self._frame,
             y=self._SCROLLABLE_HEIGHT,
-            w=self._GRID_SIZE,
+            w=self._BUTTON_WIDTH,
             h=self._GRID_SIZE - self._SCROLLABLE_HEIGHT,
-            bg=self._BUTTON_BG,
-            fg=self._BUTTON_FG,
-            text=self._BUTTON_TEXT,
+            bg=self._NEW_BUTTON_BG,
+            fg=self._NEW_BUTTON_FG,
+            text=self._NEW_BUTTON_TEXT,
             command=self._add_topic
         )
-        return button
+
+        # All tasks button
+        guiutils.init_grid_widget(
+            tk.Button,
+            self._frame,
+            x=self._BUTTON_WIDTH,
+            y=self._SCROLLABLE_HEIGHT,
+            w=self._BUTTON_WIDTH,
+            h=self._GRID_SIZE - self._SCROLLABLE_HEIGHT,
+            bg=self._ALL_BUTTON_BG,
+            fg=self._ALL_BUTTON_FG,
+            text=self._ALL_BUTTON_TEXT,
+            command=self._select_all_tasks
+        )
+
+        # Completed tasks button
+        guiutils.init_grid_widget(
+            tk.Button,
+            self._frame,
+            x=self._BUTTON_WIDTH * 2,
+            y=self._SCROLLABLE_HEIGHT,
+            w=self._BUTTON_WIDTH,
+            h=self._GRID_SIZE - self._SCROLLABLE_HEIGHT,
+            bg=self._COMPLETED_BUTTON_BG,
+            fg=self._COMPLETED_BUTTON_FG,
+            text=self._COMPLETED_BUTTON_TEXT,
+            command=self._select_completed_tasks
+        )
 
     def _add_topic(self):
         topic = dialog.askstring(
@@ -190,7 +290,7 @@ class TopicPanel(Panel):
             bg=color,
             fg=self._calc_fg(color),
         )
-        button.bind("<Button-1>", lambda _, topic=topic: self._render_topic_tasks(topic))
+        button.bind("<Button-1>", lambda _, topic=topic: self._select_topic_tasks(topic))
         button.bind("<Button-3>", lambda _, topic=topic: self._remove_topic(topic))
         return button
 
@@ -198,5 +298,11 @@ class TopicPanel(Panel):
         for button in self._topic_buttons.values():
             button.pack(fill=tk.X)
 
-    def _render_topic_tasks(self, topic):
-        print(topic)
+    def _select_topic_tasks(self, topic):
+        self._EVENT_STREAM.publish(Events.SELECT_TASK_TOPIC, topic)
+
+    def _select_all_tasks(self):
+        self._EVENT_STREAM.publish(Events.SELECT_TASK_TOPIC, None)
+
+    def _select_completed_tasks(self):
+        self._EVENT_STREAM.publish(Events.SELECT_TASKS_COMPLETED)
